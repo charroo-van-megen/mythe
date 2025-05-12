@@ -1,99 +1,73 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 public class PlayerMovementGrappling : MonoBehaviour
 {
     [Header("Movement")]
-    private float moveSpeed;
-    public float walkSpeed;
-    public float sprintSpeed;
-    public float swingSpeed;
-
-    public float groundDrag;
+    public float walkSpeed = 5f;
+    public float sprintSpeed = 8f;
+    public float swingSpeed = 12f;
+    public float groundDrag = 5f;
 
     [Header("Jumping")]
-    public float jumpForce;
-    public float jumpCooldown;
-    public float airMultiplier;
-    bool readyToJump;
+    public float jumpForce = 12f;
+    public float jumpCooldown = 0.25f;
+    public float airMultiplier = 0.4f;
+    private bool readyToJump = true;
 
     [Header("Crouching")]
-    public float crouchSpeed;
-    public float crouchYScale;
+    public float crouchSpeed = 2f;
+    public float crouchYScale = 0.5f;
     private float startYScale;
 
-    [Header("Keybinds")]
-    public KeyCode jumpKey = KeyCode.Space;
-    public KeyCode sprintKey = KeyCode.LeftShift;
-    public KeyCode crouchKey = KeyCode.LeftControl;
-
     [Header("Ground Check")]
-    public float playerHeight;
+    public float playerHeight = 2f;
     public LayerMask whatIsGround;
-    bool grounded;
+    private bool grounded;
 
     [Header("Slope Handling")]
-    public float maxSlopeAngle;
+    public float maxSlopeAngle = 40f;
     private RaycastHit slopeHit;
     private bool exitingSlope;
 
-    [Header("Camera Effects")]
+    [Header("References")]
+    public Transform orientation;
     public PlayerCam cam;
     public float grappleFov = 95f;
 
-    public Transform orientation;
+    public TextMeshProUGUI text_speed;
+    public TextMeshProUGUI text_mode;
 
-    float horizontalInput;
-    float verticalInput;
+    private Rigidbody rb;
+    private float moveSpeed;
+    private Vector3 moveDirection;
+    private float horizontalInput;
+    private float verticalInput;
 
-    Vector3 moveDirection;
-
-    Rigidbody rb;
-
+    public enum MovementState { freeze, grappling, swinging, walking, sprinting, crouching, air }
     public MovementState state;
-    public enum MovementState
-    {
-        freeze,
-        grappling,
-        swinging,
-        walking,
-        sprinting,
-        crouching,
-        air
-    }
 
     public bool freeze;
-
     public bool activeGrapple;
     public bool swinging;
+
+    private Vector3 _pendingVelocity;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-
-        readyToJump = true;
-
         startYScale = transform.localScale.y;
     }
 
     private void Update()
     {
-        // ground check
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
-
+        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.3f, whatIsGround);
         MyInput();
         SpeedControl();
         StateHandler();
-
-        // handle drag
-        if (grounded && !activeGrapple)
-            rb.drag = groundDrag;
-        else
-            rb.drag = 0;
-
+        rb.linearDamping = (grounded && !activeGrapple) ? groundDrag : 0f;
         TextStuff();
     }
 
@@ -107,25 +81,20 @@ public class PlayerMovementGrappling : MonoBehaviour
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
-        // when to jump
-        if (Input.GetKey(jumpKey) && readyToJump && grounded)
+        if (Input.GetKeyDown(KeyCode.Space) && readyToJump && grounded)
         {
             readyToJump = false;
-
             Jump();
-
             Invoke(nameof(ResetJump), jumpCooldown);
         }
 
-        // start crouch
-        if (Input.GetKeyDown(crouchKey))
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
             rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
         }
 
-        // stop crouch
-        if (Input.GetKeyUp(crouchKey))
+        if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
         }
@@ -133,50 +102,37 @@ public class PlayerMovementGrappling : MonoBehaviour
 
     private void StateHandler()
     {
-        // Mode - Freeze
         if (freeze)
         {
             state = MovementState.freeze;
-            moveSpeed = 0;
-            rb.velocity = Vector3.zero;
+            moveSpeed = 0f;
+            rb.linearVelocity = Vector3.zero;
         }
-
-        // Mode - Grappling
         else if (activeGrapple)
         {
             state = MovementState.grappling;
             moveSpeed = sprintSpeed;
         }
-
-        // Mode - Swinging
         else if (swinging)
         {
             state = MovementState.swinging;
             moveSpeed = swingSpeed;
         }
-
-        // Mode - Crouching
-        else if (Input.GetKey(crouchKey))
+        else if (Input.GetKey(KeyCode.LeftControl))
         {
             state = MovementState.crouching;
             moveSpeed = crouchSpeed;
         }
-
-        // Mode - Sprinting
-        else if (grounded && Input.GetKey(sprintKey))
+        else if (grounded && Input.GetKey(KeyCode.LeftShift))
         {
             state = MovementState.sprinting;
             moveSpeed = sprintSpeed;
         }
-
-        // Mode - Walking
         else if (grounded)
         {
             state = MovementState.walking;
             moveSpeed = walkSpeed;
         }
-
-        // Mode - Air
         else
         {
             state = MovementState.air;
@@ -185,30 +141,20 @@ public class PlayerMovementGrappling : MonoBehaviour
 
     private void MovePlayer()
     {
-        if (activeGrapple) return;
-        if (swinging) return;
+        if (activeGrapple || swinging) return;
 
-        // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
-        // on slope
         if (OnSlope() && !exitingSlope)
         {
             rb.AddForce(GetSlopeMoveDirection() * moveSpeed * 20f, ForceMode.Force);
-
-            if (rb.velocity.y > 0)
-                rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+            if (rb.linearVelocity.y > 0) rb.AddForce(Vector3.down * 80f, ForceMode.Force);
         }
-
-        // on ground
         else if (grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
-
-        // in air
-        else if (!grounded)
+        else
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
-        // turn gravity off while on slope
         rb.useGravity = !OnSlope();
     }
 
@@ -216,68 +162,45 @@ public class PlayerMovementGrappling : MonoBehaviour
     {
         if (activeGrapple) return;
 
-        // limiting speed on slope
-        if (OnSlope() && !exitingSlope)
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (flatVel.magnitude > moveSpeed)
         {
-            if (rb.velocity.magnitude > moveSpeed)
-                rb.velocity = rb.velocity.normalized * moveSpeed;
-        }
-
-        // limiting speed on ground or in air
-        else
-        {
-            Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
-            // limit velocity if needed
-            if (flatVel.magnitude > moveSpeed)
-            {
-                Vector3 limitedVel = flatVel.normalized * moveSpeed;
-                rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
-            }
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
         }
     }
 
     private void Jump()
     {
         exitingSlope = true;
-
-        // reset y velocity
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
-    private void ResetJump()
-    {
-        readyToJump = true;
 
-        exitingSlope = false;
-    }
+    private void ResetJump() => readyToJump = true;
 
-    private bool enableMovementOnNextTouch;
-    public void JumpToPosition(Vector3 targetPosition, float trajectoryHeight)
+    public void JumpToPosition(Vector3 target, float height)
     {
         activeGrapple = true;
-
-        velocityToSet = CalculateJumpVelocity(transform.position, targetPosition, trajectoryHeight);
-        Invoke(nameof(SetVelocity), 0.1f);
-
+        _pendingVelocity = CalculateJumpVelocity(transform.position, target, height);
+        Invoke(nameof(SetVelocityInternal), 0.1f); // This correctly calls the SetVelocityInternal method after 0.1s
         Invoke(nameof(ResetRestrictions), 3f);
     }
 
-    private Vector3 velocityToSet;
-    private void SetVelocity()
+    private void SetVelocityInternal()
     {
         enableMovementOnNextTouch = true;
-        rb.velocity = velocityToSet;
-
-        cam.DoFov(grappleFov);
+        rb.linearVelocity = _pendingVelocity;
+        if (cam != null) cam.DoFov(grappleFov);
     }
 
-    public void ResetRestrictions()
+    private void ResetRestrictions()
     {
         activeGrapple = false;
-        cam.DoFov(85f);
+        if (cam != null) cam.DoFov(85f);
     }
+
+    private bool enableMovementOnNextTouch;
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -285,8 +208,7 @@ public class PlayerMovementGrappling : MonoBehaviour
         {
             enableMovementOnNextTouch = false;
             ResetRestrictions();
-
-            GetComponent<Grappling>().StopGrapple();
+            GetComponent<Grappling>()?.StopGrapple();
         }
     }
 
@@ -297,50 +219,28 @@ public class PlayerMovementGrappling : MonoBehaviour
             float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
             return angle < maxSlopeAngle && angle != 0;
         }
-
         return false;
     }
 
-    private Vector3 GetSlopeMoveDirection()
-    {
-        return Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
-    }
+    private Vector3 GetSlopeMoveDirection() =>
+        Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
 
-    public Vector3 CalculateJumpVelocity(Vector3 startPoint, Vector3 endPoint, float trajectoryHeight)
+    public Vector3 CalculateJumpVelocity(Vector3 start, Vector3 end, float height)
     {
         float gravity = Physics.gravity.y;
-        float displacementY = endPoint.y - startPoint.y;
-        Vector3 displacementXZ = new Vector3(endPoint.x - startPoint.x, 0f, endPoint.z - startPoint.z);
+        float displacementY = end.y - start.y;
+        Vector3 displacementXZ = new Vector3(end.x - start.x, 0, end.z - start.z);
 
-        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * trajectoryHeight);
-        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * trajectoryHeight / gravity) 
-            + Mathf.Sqrt(2 * (displacementY - trajectoryHeight) / gravity));
+        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * height);
+        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * height / gravity) + Mathf.Sqrt(2 * (displacementY - height) / gravity));
 
         return velocityXZ + velocityY;
     }
 
-    #region Text & Debugging
-
-    public TextMeshProUGUI text_speed;
-    public TextMeshProUGUI text_mode;
     private void TextStuff()
     {
-        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
-        if (OnSlope())
-            text_speed.SetText("Speed: " + Round(rb.velocity.magnitude, 1) + " / " + Round(moveSpeed, 1));
-
-        else
-            text_speed.SetText("Speed: " + Round(flatVel.magnitude, 1) + " / " + Round(moveSpeed, 1));
-
-        text_mode.SetText(state.ToString());
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        text_speed?.SetText("Speed: " + flatVel.magnitude.ToString("F1") + " / " + moveSpeed.ToString("F1"));
+        text_mode?.SetText(state.ToString());
     }
-
-    public static float Round(float value, int digits)
-    {
-        float mult = Mathf.Pow(10.0f, (float)digits);
-        return Mathf.Round(value * mult) / mult;
-    }
-
-    #endregion
 }
