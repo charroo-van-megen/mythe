@@ -24,7 +24,7 @@ public class PlayerGrapplingController : MonoBehaviour
     private void SetVelocity()
     {
         enableMovementOnNextTouch = true;
-        rb.linearVelocity = _pendingVelocity; // ✅ Corrected from rb.linearVelocity
+        rb.linearVelocity = _pendingVelocity;
         cam?.DoFov(grappleFov);
     }
 
@@ -49,8 +49,7 @@ public class PlayerGrapplingController : MonoBehaviour
         Vector3 displacementXZ = new Vector3(end.x - start.x, 0f, end.z - start.z);
 
         Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * height);
-        Vector3 velocityXZ = displacementXZ /
-            (Mathf.Sqrt(-2 * height / gravity) + Mathf.Sqrt(2 * (displacementY - height) / gravity));
+        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * height / gravity) + Mathf.Sqrt(2 * (displacementY - height) / gravity));
 
         return velocityXZ + velocityY;
     }

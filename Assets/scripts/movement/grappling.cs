@@ -1,7 +1,6 @@
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerGrapplingController))]
-[RequireComponent(typeof(PlayerMovementController))]
 public class Grappling : MonoBehaviour
 {
     [Header("References")]
@@ -17,7 +16,7 @@ public class Grappling : MonoBehaviour
     public float cooldown = 2f;
     public KeyCode grappleKey = KeyCode.Mouse1;
 
-    private PlayerMovementController pm;
+    private Rigidbody rb;
     private PlayerGrapplingController grapplingController;
 
     private Vector3 grapplePoint;
@@ -26,7 +25,7 @@ public class Grappling : MonoBehaviour
 
     private void Awake()
     {
-        pm = GetComponent<PlayerMovementController>();
+        rb = GetComponent<Rigidbody>();  // Get Rigidbody for movement control
         grapplingController = GetComponent<PlayerGrapplingController>();
 
         if (lr != null)
@@ -56,11 +55,11 @@ public class Grappling : MonoBehaviour
 
     private void StartGrapple()
     {
-        if (isGrappling || lr == null || pm == null || grapplingController == null)
+        if (isGrappling || lr == null || grapplingController == null)
             return;
 
         isGrappling = true;
-        pm.freeze = true;
+        FreezePlayerMovement(true);  // Freeze movement when grappling
 
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
@@ -85,8 +84,7 @@ public class Grappling : MonoBehaviour
 
     private void ExecuteGrapple()
     {
-        pm.freeze = false;
-
+        FreezePlayerMovement(false);  // Unfreeze movement after grapple execution
         float relativeY = grapplePoint.y - (transform.position.y - 1f);
         float arcHeight = relativeY > 0 ? relativeY + overshootYAxis : overshootYAxis;
 
@@ -96,7 +94,7 @@ public class Grappling : MonoBehaviour
     public void StopGrapple()
     {
         isGrappling = false;
-        pm.freeze = false;
+        FreezePlayerMovement(false);  // Unfreeze player movement
         grapplingController.ResetFov();
 
         if (lr != null)
@@ -107,4 +105,12 @@ public class Grappling : MonoBehaviour
 
     public bool IsGrappling() => isGrappling;
     public Vector3 GetGrapplePoint() => grapplePoint;
+
+    private void FreezePlayerMovement(bool freeze)
+    {
+        if (rb != null)
+        {
+            rb.isKinematic = freeze;  // Disable Rigidbody physics when freezing the player
+        }
+    }
 }
