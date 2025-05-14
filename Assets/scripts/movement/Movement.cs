@@ -58,43 +58,48 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetKeyDown(crouchKey))
         {
-            isCrouching = true;
-
-            // Lower the camera
-            Vector3 camPos = playerCamera.transform.localPosition;
-            camPos.y = originalCameraY - 0.5f;
-            playerCamera.transform.localPosition = camPos;
-
-            // Scale player down
-            Vector3 scale = transform.localScale;
-            scale.y = crouchingHeight / standingHeight;
-            transform.localScale = scale;
-        }
-        else if (Input.GetKeyUp(crouchKey))
-        {
-            // Check for obstruction above the player before standing
-            float headClearance = (standingHeight - crouchingHeight) * 0.5f;
-            Vector3 rayOrigin = transform.position + Vector3.up * (crouchingHeight * 0.5f);
-            bool isBlocked = Physics.Raycast(rayOrigin, Vector3.up, headClearance);
-
-            if (!isBlocked)
+            if (isCrouching)
             {
-                isCrouching = false;
+                // Attempt to stand up
+                float headClearance = (standingHeight - crouchingHeight) * 0.5f;
+                Vector3 rayOrigin = transform.position + Vector3.up * (crouchingHeight * 0.5f);
+                bool isBlocked = Physics.Raycast(rayOrigin, Vector3.up, headClearance);
 
-                // Reset camera height
-                Vector3 camPos = playerCamera.transform.localPosition;
-                camPos.y = originalCameraY;
-                playerCamera.transform.localPosition = camPos;
+                if (!isBlocked)
+                {
+                    // Safe to stand
+                    isCrouching = false;
 
-                // Reset scale
-                Vector3 scale = transform.localScale;
-                scale.y = 1f;
-                transform.localScale = scale;
+                    // Reset camera height
+                    Vector3 camPos = playerCamera.transform.localPosition;
+                    camPos.y = originalCameraY;
+                    playerCamera.transform.localPosition = camPos;
+
+                    // Reset scale
+                    Vector3 scale = transform.localScale;
+                    scale.y = 1f;
+                    transform.localScale = scale;
+                }
+                else
+                {
+                    // Still crouching due to obstruction
+                    Debug.Log("Cannot stand up, something is above!");
+                }
             }
             else
             {
-                // Optional: debug message
-                Debug.Log("Can't stand up! Obstruction above.");
+                // Start crouching
+                isCrouching = true;
+
+                // Lower camera
+                Vector3 camPos = playerCamera.transform.localPosition;
+                camPos.y = originalCameraY - 0.5f;
+                playerCamera.transform.localPosition = camPos;
+
+                // Scale down
+                Vector3 scale = transform.localScale;
+                scale.y = crouchingHeight / standingHeight;
+                transform.localScale = scale;
             }
         }
     }
