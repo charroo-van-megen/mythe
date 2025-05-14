@@ -24,7 +24,7 @@ public class PlayerGrapplingController : MonoBehaviour
     private void SetVelocity()
     {
         enableMovementOnNextTouch = true;
-        rb.linearVelocity = _pendingVelocity;
+        rb.linearVelocity = _pendingVelocity; // Use linearVelocity instead of velocity
         cam?.DoFov(grappleFov);
     }
 

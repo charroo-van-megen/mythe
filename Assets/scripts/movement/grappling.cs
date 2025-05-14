@@ -25,7 +25,7 @@ public class Grappling : MonoBehaviour
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();  // Get Rigidbody for movement control
+        rb = GetComponent<Rigidbody>();
         grapplingController = GetComponent<PlayerGrapplingController>();
 
         if (lr != null)
