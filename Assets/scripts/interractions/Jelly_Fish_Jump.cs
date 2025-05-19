@@ -16,16 +16,16 @@ public class Jelly_Fish_Jump : MonoBehaviour
             if (playerRigidbody != null)
             {
                 // Calculate the current vertical velocity
-                float currentVerticalVelocity = playerRigidbody.velocity.y;
+                float currentVerticalVelocity = playerRigidbody.linearVelocity.y;
 
                 // Ensure the player doesn't exceed the max jump height
                 if (playerRigidbody.transform.position.y < maxJumpHeight)
                 {
                     // Apply bounce force
-                    playerRigidbody.velocity = new Vector3(
-                        playerRigidbody.velocity.x,
+                    playerRigidbody.linearVelocity = new Vector3(
+                        playerRigidbody.linearVelocity.x,
                         Mathf.Max(bounceForce, currentVerticalVelocity),
-                        playerRigidbody.velocity.z
+                        playerRigidbody.linearVelocity.z
                     );
                 }
             }
