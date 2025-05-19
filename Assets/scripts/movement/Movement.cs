@@ -11,6 +11,7 @@ public class Movement : MonoBehaviour
     public float standingHeight = 2f;
     public float crouchingHeight = 1f;
     public KeyCode crouchKey = KeyCode.LeftControl;
+    public Rigidbody rb;
 
     private float cameraPitch = 0f; // Camera pitch angle
     [SerializeField] private bool isCrouching = false;
@@ -19,6 +20,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         originalCameraY = playerCamera.transform.localPosition.y;
+        rb = GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -47,11 +49,10 @@ public class Movement : MonoBehaviour
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.forward * moveZ + transform.right * moveX;
-        move.Normalize();
+        Vector3 movement = new Vector3(moveX, 0f, moveZ) * moveSpeed;
 
         float currentSpeed = isCrouching ? crouchSpeed : moveSpeed;
-        transform.position += move * currentSpeed * Time.deltaTime;
+        rb.AddForce(movement, ForceMode.Force);
     }
 
     void HandleCrouch()
