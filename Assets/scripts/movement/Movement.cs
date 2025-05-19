@@ -2,32 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Movement : MonoBehaviour
 {
-    public float moveSpeed = 10f; // Movement speed
-    public float crouchSpeed = 4f; // Crouch movement speed
-    public float turnSpeed = 8f; // Speed of turning
-    public Camera playerCamera; // Camera to determine direction
+    public float moveSpeed = 10f;             // Movement speed when standing
+    public float crouchSpeed = 4f;            // Movement speed when crouching
+    public float turnSpeed = 8f;              // Mouse look speed
+    public Camera playerCamera;               // Camera for looking and positioning
     public float standingHeight = 2f;
     public float crouchingHeight = 1f;
     public KeyCode crouchKey = KeyCode.LeftControl;
-    public Rigidbody rb;
 
-    private float cameraPitch = 0f; // Camera pitch angle
-    [SerializeField] private bool isCrouching = false;
+    private Rigidbody rb;
+    private float cameraPitch = 0f;
     private float originalCameraY;
+    private bool isCrouching = false;
 
     void Start()
     {
-        originalCameraY = playerCamera.transform.localPosition.y;
         rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true; // Prevent rotation by physics
+
+        if (playerCamera == null)
+        {
+            Debug.LogError("Player Camera not assigned!");
+        }
+
+        originalCameraY = playerCamera.transform.localPosition.y;
     }
 
     void Update()
     {
         HandleMouseLook();
-        HandleMovement();
         HandleCrouch();
+    }
+
+    void FixedUpdate()
+    {
+        HandleMovement();
     }
 
     void HandleMouseLook()
@@ -35,10 +47,10 @@ public class Movement : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * turnSpeed;
         float mouseY = Input.GetAxis("Mouse Y") * turnSpeed;
 
-        // Rotate character left/right (yaw)
+        // Rotate player horizontally
         transform.Rotate(Vector3.up * mouseX);
 
-        // Rotate camera up/down (pitch)
+        // Rotate camera vertically
         cameraPitch -= mouseY;
         cameraPitch = Mathf.Clamp(cameraPitch, -80f, 80f);
         playerCamera.transform.localEulerAngles = new Vector3(cameraPitch, 0f, 0f);
@@ -46,13 +58,15 @@ public class Movement : MonoBehaviour
 
     void HandleMovement()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
 
-        Vector3 movement = new Vector3(moveX, 0f, moveZ) * moveSpeed;
+        Vector3 inputDir = new Vector3(moveX, 0f, moveZ).normalized;
 
         float currentSpeed = isCrouching ? crouchSpeed : moveSpeed;
-        rb.AddForce(movement, ForceMode.Force);
+        Vector3 moveDir = transform.TransformDirection(inputDir) * currentSpeed * Time.fixedDeltaTime;
+
+        rb.MovePosition(rb.position + moveDir);
     }
 
     void HandleCrouch()
@@ -61,17 +75,15 @@ public class Movement : MonoBehaviour
         {
             if (isCrouching)
             {
-                // Attempt to stand up
                 float headClearance = (standingHeight - crouchingHeight) * 0.5f;
                 Vector3 rayOrigin = transform.position + Vector3.up * (crouchingHeight * 0.5f);
                 bool isBlocked = Physics.Raycast(rayOrigin, Vector3.up, headClearance);
 
                 if (!isBlocked)
                 {
-                    // Safe to stand
                     isCrouching = false;
 
-                    // Reset camera height
+                    // Reset camera position
                     Vector3 camPos = playerCamera.transform.localPosition;
                     camPos.y = originalCameraY;
                     playerCamera.transform.localPosition = camPos;
@@ -83,13 +95,11 @@ public class Movement : MonoBehaviour
                 }
                 else
                 {
-                    // Still crouching due to obstruction
-                    Debug.Log("Cannot stand up, something is above!");
+                    Debug.Log("Cannot stand up — something is blocking above.");
                 }
             }
             else
             {
-                // Start crouching
                 isCrouching = true;
 
                 // Lower camera
