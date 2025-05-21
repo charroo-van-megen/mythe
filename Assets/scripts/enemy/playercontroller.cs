@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -12,63 +10,83 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayer;
 
     private Rigidbody rb;
-    public bool isGrounded;
+    private bool isGrounded;
 
-    public Projectile projectile;
+    // Projectile prefab without any custom script attached,
+    // just a Rigidbody and Collider.
+    public GameObject projectilePrefab;
 
-    // Last horizontal input direction (-1 left, 1 right)
-    public float lastInput = 1;
+    // Last horizontal input (-1 left, 1 right)
+    private float lastInput = 1f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
 
         if (groundCheck == null)
-        {
-            Debug.LogError("GroundCheck transform is not assigned in the Inspector!", this);
-        }
+            Debug.LogError("GroundCheck is not assigned in Inspector!");
+        if (projectilePrefab == null)
+            Debug.LogError("Projectile prefab is not assigned in Inspector!");
     }
 
     void Update()
     {
-        // Get movement input on X (left/right) and Z (forward/back)
+        // Movement Input
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
 
-        if (moveX != 0 || moveZ != 0)
-        {
-            lastInput = moveX != 0 ? moveX : lastInput;
-        }
+        if (moveX != 0)
+            lastInput = moveX;
 
-        // Move player - keep current Y velocity (vertical)
+        // Move player - preserve Y velocity
         Vector3 velocity = moveDirection * moveSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
 
-        // Ground check using sphere overlap
+        // Ground check
         if (groundCheck != null)
-        {
             isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
-        }
 
-        // Jump on ground and press W or Space
-        if (isGrounded && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space)))
+        // Jump
+        if (isGrounded && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow)))
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
         }
 
-        // Shoot projectile when pressing left mouse button or spacebar
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        // Shoot projectile on left mouse button
+        if (Input.GetMouseButtonDown(0))
         {
-            Vector3 shootDirection = new Vector3(lastInput, 0, 0).normalized;
-
-            if (shootDirection == Vector3.zero)
-                shootDirection = Vector3.forward; // default direction
-
-            Projectile projectileInstance = Instantiate(projectile, transform.position + shootDirection, Quaternion.LookRotation(shootDirection));
-            projectileInstance.rb.AddForce(shootDirection * 10f, ForceMode.Impulse);
+            ShootProjectile();
         }
+    }
+
+    void ShootProjectile()
+    {
+        if (projectilePrefab == null)
+            return;
+
+        Vector3 shootDirection = new Vector3(lastInput, 0f, 0f).normalized;
+        if (shootDirection == Vector3.zero)
+            shootDirection = transform.forward;
+
+        Vector3 spawnPos = transform.position + shootDirection;
+
+        // Instantiate the projectile prefab (no custom script needed)
+        GameObject projInstance = Instantiate(projectilePrefab, spawnPos, Quaternion.LookRotation(shootDirection));
+
+        Rigidbody projRb = projInstance.GetComponent<Rigidbody>();
+        if (projRb != null)
+        {
+            projRb.AddForce(shootDirection * 10f, ForceMode.Impulse);
+        }
+        else
+        {
+            Debug.LogWarning("Projectile prefab missing Rigidbody component.");
+        }
+
+        // Optionally destroy the projectile after some time so it doesn't persist forever
+        Destroy(projInstance, 3f);
     }
 }
