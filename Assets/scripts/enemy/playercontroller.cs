@@ -22,6 +22,11 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        if (groundCheck == null)
+        {
+            Debug.LogError("GroundCheck transform is not assigned in the Inspector!", this);
+        }
     }
 
     void Update()
@@ -43,7 +48,10 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = velocity;
 
         // Ground check using sphere overlap
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+        if (groundCheck != null)
+        {
+            isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+        }
 
         // Jump on ground and press W or Space
         if (isGrounded && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space)))
