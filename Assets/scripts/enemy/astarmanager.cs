@@ -23,11 +23,12 @@ public class AStarManager : MonoBehaviour
         if (start == null || end == null)
         {
             Debug.LogWarning("Start or End node is null in GeneratePath.");
-            return null;
+            return new List<Node>(); // Return empty list instead of null
         }
 
         List<Node> openSet = new List<Node>();
 
+        // Reset all nodes
         foreach (Node node in FindObjectsByType<Node>(FindObjectsSortMode.None))
         {
             node.gScore = float.MaxValue;
@@ -72,7 +73,8 @@ public class AStarManager : MonoBehaviour
             }
         }
 
-        return null; // No path found
+        // No path found, return empty list instead of null
+        return new List<Node>();
     }
 
     private List<Node> ReconstructPath(Node end, Node start)

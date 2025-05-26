@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Jump : MonoBehaviour
 {
-    public float speed = 20f;
+    public float speed = 20f; // (Optional: You can use this for jump force if you want)
     public Rigidbody rb;
     private bool isGrounded = true;
 
@@ -19,13 +19,18 @@ public class Jump : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            rb.linearVelocity = new Vector3(0, 5, 0);
+            // Set upward velocity to make the player jump
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 5f, rb.linearVelocity.z);
             isGrounded = false;
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        isGrounded = true;
+        // Only reset isGrounded if we hit an object tagged as "Ground"
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
     }
 }
