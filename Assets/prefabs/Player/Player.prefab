@@ -179,9 +179,8 @@ GameObject:
   - component: {fileID: 4009985430158186851}
   - component: {fileID: 9092177618309224138}
   - component: {fileID: 1374515824960051420}
-  - component: {fileID: 3270623781117716000}
-  - component: {fileID: 1367900425445477323}
-  - component: {fileID: 3720772661107028279}
+  - component: {fileID: 8451272297407165551}
+  - component: {fileID: 132436908580824967}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -259,8 +258,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &3270623781117716000
-CapsuleCollider:
+--- !u!143 &8451272297407165551
+CharacterController:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -274,42 +273,17 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
+  serializedVersion: 3
   m_Height: 2
-  m_Direction: 1
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &1367900425445477323
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7459332390593906543}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 1
---- !u!114 &3720772661107028279
+--- !u!114 &132436908580824967
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -318,13 +292,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 7459332390593906543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bfd1daadeb65994c85f996d8832d74b, type: 3}
+  m_Script: {fileID: 11500000, guid: ee6f93a3d1ea59d4b99abff158ecb243, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  crouchSpeed: 3
-  turnSpeed: 4
-  jumpForce: 4
+  moveSpeed: 10
+  crouchSpeed: 4
+  turnSpeed: 8
+  jumpHeight: 1
+  gravity: -9.81
   playerCamera: {fileID: 5008840591150657758}
   standingHeight: 2
   crouchingHeight: 1

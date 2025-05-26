@@ -69,6 +69,8 @@ public class Movement : MonoBehaviour
         float speed = isCrouching ? crouchSpeed : moveSpeed;
 
         Vector3 move = transform.TransformDirection(inputDir) * speed * Time.fixedDeltaTime;
+
+        
         rb.MovePosition(rb.position + move);
     }
 

@@ -2,26 +2,17 @@ using UnityEngine;
 
 public class Jelly_Fish_Jump : MonoBehaviour
 {
-    public float bounceForce = 10f; // Base force applied when bouncing
-    private Rigidbody playerRigidbody;
+    public float launchForce = 15f;
+    public string playerTag = "Player";
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        // Check if the object colliding is the player
-        if (collision.gameObject.CompareTag("Player"))
+        if (other.CompareTag(playerTag))
         {
-            playerRigidbody = collision.gameObject.GetComponent<Rigidbody>();
-
-            if (playerRigidbody != null)
+            New_Movement playerMovement = other.GetComponent<New_Movement>();
+            if (playerMovement != null && playerMovement.velocity.y <= 0f)
             {
-                // Calculate the current vertical velocity
-                float currentVerticalVelocity = playerRigidbody.linearVelocity.y; 
-                
-                // Apply bounce force
-                playerRigidbody.linearVelocity = new Vector3(
-                playerRigidbody.linearVelocity.x,
-                Mathf.Max(bounceForce, currentVerticalVelocity),
-                playerRigidbody.linearVelocity.z);              
+                playerMovement.velocity.y = launchForce;
             }
         }
     }
