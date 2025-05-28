@@ -17,7 +17,7 @@ MonoBehaviour:
   m_ScopedRegistriesSettingsExpanded: 1
   m_SeeAllPackageVersions: 0
   m_DismissPreviewPackagesInUse: 0
-  oneTimeWarningShown: 0
+  oneTimeWarningShown: 1
   oneTimeDeprecatedPopUpShown: 0
   m_Registries:
   - m_Id: main
@@ -30,8 +30,8 @@ MonoBehaviour:
   m_UserSelectedRegistryName: 
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
-    m_Modified: 0
-    m_ErrorMessage: 
-    m_UserModificationsInstanceId: -900
-    m_OriginalInstanceId: -902
+    m_Modified: 1
+    m_ErrorMessage: Scope(s) cannot be empty
+    m_UserModificationsInstanceId: -864
+    m_OriginalInstanceId: -866
   m_LoadAssets: 0
