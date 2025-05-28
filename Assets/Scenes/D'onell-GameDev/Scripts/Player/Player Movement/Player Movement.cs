@@ -39,12 +39,5 @@ public class PlayerMovement : MonoBehaviour
         {
             Player.AddForce(transform.right * playerSpeed, ForceMode.Force);
         }
-        
-        /// SPEEDCAP
-        
-        if(playerSpeed >= 10)
-        {
-            playerSpeed = -10;
-        }
     }
 }
