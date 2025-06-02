@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &2409275435666378525
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 10.12
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.0000019073486
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -38.565414
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      propertyPath: m_Name
+      value: jellyfish2.0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -5606727657538597393, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6507339124940236176}
+    - targetCorrespondingSourceObject: {fileID: -5606727657538597393, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5099930864262435486}
+  m_SourcePrefab: {fileID: 100100000, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+--- !u!1 &1395994770047091442 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -5606727657538597393, guid: 957c2913010b1ed4b8cc90b040eb525f, type: 3}
+  m_PrefabInstance: {fileID: 2409275435666378525}
+  m_PrefabAsset: {fileID: 0}
+--- !u!135 &6507339124940236176
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395994770047091442}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1.2324841
+  m_Center: {x: 0.0013652444, y: -0.44, z: 0.000025808811}
+--- !u!114 &5099930864262435486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395994770047091442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6b9f2e73a9f954fbf9878799e7d45c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  launchForce: 15
+  playerTag: Player

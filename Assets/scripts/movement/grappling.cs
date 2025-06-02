@@ -1,111 +1,116 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerGrapplingController))]
 public class Grappling : MonoBehaviour
 {
     [Header("References")]
-    private PlayerMovementGrappling pm;
     public Transform cam;
     public Transform gunTip;
     public LayerMask whatIsGrappleable;
     public LineRenderer lr;
 
-    [Header("Grappling")]
-    public float maxGrappleDistance;
-    public float grappleDelayTime;
-    public float overshootYAxis;
-
-    private Vector3 grapplePoint;
-
-    [Header("Cooldown")]
-    public float grapplingCd;
-    private float grapplingCdTimer;
-
-    [Header("Input")]
+    [Header("Settings")]
+    public float maxGrappleDistance = 40f;
+    public float grappleDelayTime = 0.2f;
+    public float overshootYAxis = 5f;
+    public float cooldown = 2f;
     public KeyCode grappleKey = KeyCode.Mouse1;
 
-    private bool grappling;
+    private Rigidbody rb;
+    private PlayerGrapplingController grapplingController;
 
-    private void Start()
+    private Vector3 grapplePoint;
+    private float cooldownTimer;
+    private bool isGrappling;
+
+    private void Awake()
     {
-        pm = GetComponent<PlayerMovementGrappling>();
+        rb = GetComponent<Rigidbody>();
+        grapplingController = GetComponent<PlayerGrapplingController>();
+
+        if (lr != null)
+        {
+            lr.enabled = false;
+        }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(grappleKey)) StartGrapple();
+        cooldownTimer -= Time.deltaTime;
 
-        if (grapplingCdTimer > 0)
-            grapplingCdTimer -= Time.deltaTime;
+        if (Input.GetKeyDown(grappleKey) && cooldownTimer <= 0f && !isGrappling)
+        {
+            StartGrapple();
+        }
     }
 
     private void LateUpdate()
     {
-        // if (grappling)
-        //    lr.SetPosition(0, gunTip.position);
+        if (isGrappling && lr != null && lr.enabled)
+        {
+            lr.SetPosition(0, gunTip.position);
+            lr.SetPosition(1, grapplePoint);
+        }
     }
 
     private void StartGrapple()
     {
-        if (grapplingCdTimer > 0) return;
+        if (isGrappling || lr == null || grapplingController == null)
+            return;
 
-        grappling = true;
-
-        pm.freeze = true;
+        isGrappling = true;
+        FreezePlayerMovement(true);  // Freeze movement when grappling
 
         RaycastHit hit;
-        if(Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
+        if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
         {
             grapplePoint = hit.point;
-
-            Invoke(nameof(ExecuteGrapple), grappleDelayTime);
+            lr.startColor = Color.green;
         }
         else
         {
-            grapplePoint = cam.position + cam.forward * maxGrappleDistance;
-
-            Invoke(nameof(StopGrapple), grappleDelayTime);
+            StopGrapple(); // No valid target, cancel grapple
+            return;
         }
 
-        //lr.enabled = true;
-        //lr.SetPosition(1, grapplePoint);
+        lr.SetPosition(0, gunTip.position);
+        lr.SetPosition(1, grapplePoint);
+        lr.enabled = true;
+
+        cooldownTimer = cooldown;
+
+        Invoke(nameof(ExecuteGrapple), grappleDelayTime);
     }
 
     private void ExecuteGrapple()
     {
-        pm.freeze = false;
+        FreezePlayerMovement(false);  // Unfreeze movement after grapple execution
+        float relativeY = grapplePoint.y - (transform.position.y - 1f);
+        float arcHeight = relativeY > 0 ? relativeY + overshootYAxis : overshootYAxis;
 
-        Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
-
-        float grapplePointRelativeYPos = grapplePoint.y - lowestPoint.y;
-        float highestPointOnArc = grapplePointRelativeYPos + overshootYAxis;
-
-        if (grapplePointRelativeYPos < 0) highestPointOnArc = overshootYAxis;
-
-        pm.JumpToPosition(grapplePoint, highestPointOnArc);
-
-        Invoke(nameof(StopGrapple), 1f);
+        grapplingController.JumpToPosition(grapplePoint, arcHeight);
     }
 
     public void StopGrapple()
     {
-        pm.freeze = false;
+        isGrappling = false;
+        FreezePlayerMovement(false);  // Unfreeze player movement
+        grapplingController.ResetFov();
 
-        grappling = false;
-
-        grapplingCdTimer = grapplingCd;
-
-        //lr.enabled = false;
+        if (lr != null)
+        {
+            lr.enabled = false;
+        }
     }
 
-    public bool IsGrappling()
-    {
-        return grappling;
-    }
+    public bool IsGrappling() => isGrappling;
+    public Vector3 GetGrapplePoint() => grapplePoint;
 
-    public Vector3 GetGrapplePoint()
+    private void FreezePlayerMovement(bool freeze)
     {
-        return grapplePoint;
+        if (rb != null)
+        {
+            rb.isKinematic = freeze;  // Disable Rigidbody physics when freezing the player
+        }
     }
 }
