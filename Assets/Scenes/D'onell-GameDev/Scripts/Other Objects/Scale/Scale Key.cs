@@ -9,7 +9,9 @@ public class ScaleKey : MonoBehaviour
     public GameObject TwoScale;
     public GameObject ThreeScale;
     public GameObject CannotPlaceScaleText;
-    public GameObject ScaleKeyShow;
+    public GameObject ScaleKeyShowOne;
+    public GameObject ScaleKeyShowTwo;
+    public GameObject ScaleKeyShowThree;
 
     public int GivenAKey;
 
@@ -21,7 +23,9 @@ public class ScaleKey : MonoBehaviour
 
         PlaceScaleText.SetActive(false);
         CannotPlaceScaleText.SetActive(false);
-        ScaleKeyShow.SetActive(false);
+        ScaleKeyShowOne.SetActive(false);
+        ScaleKeyShowTwo.SetActive(false);
+        ScaleKeyShowThree.SetActive(false);
     }
 
     private void OnTriggerStay(Collider other)
@@ -47,16 +51,21 @@ public class ScaleKey : MonoBehaviour
                     if (Inventory.Keys == 1)
                     {
                         Scale.gameObject.SetActive(false);
+                        ScaleKeyShowOne.SetActive(true);
+                    
                     }
                                                  
                     if(Inventory.Keys == 2)
                     {
                         TwoScale.gameObject.SetActive(false);
+                        ScaleKeyShowTwo.SetActive(true);
+                    
                     }
 
                     if (Inventory.Keys == 3)
                     {
                         ThreeScale.gameObject.SetActive(false);
+                        ScaleKeyShowThree.SetActive(true);
                     }
                     Inventory.Keys--;
                 }
@@ -66,7 +75,7 @@ public class ScaleKey : MonoBehaviour
                     Locked.locked = false;
                     PlaceScaleText.SetActive(false);
                     CannotPlaceScaleText.SetActive(false);
-                    ScaleKeyShow.SetActive(true);
+                    
                     Debug.Log("You Unlocked the gate!");
                 }
             }
