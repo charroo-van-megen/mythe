@@ -4,11 +4,16 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Rigidbody))]
 public class Movement : MonoBehaviour
 {
+    [Header("Movement Settings")]
     public float moveSpeed = 10f;
     public float crouchSpeed = 4f;
-    public float turnSpeed = 8f; // This is the value we will control with the slider
     public float jumpForce = 6f;
 
+    [Header("Mouse Look Settings")]
+    public float turnSpeed = 8f;  // Sensitivity multiplier
+    public Slider sensitivitySlider;  // Assign in Inspector
+
+    [Header("Camera & Crouch")]
     public Camera playerCamera;
     public float standingHeight = 2f;
     public float crouchingHeight = 1f;
@@ -16,11 +21,8 @@ public class Movement : MonoBehaviour
 
     [Tooltip("Assign a Transform placed slightly below the player")]
     public Transform groundCheck;
-
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
-
-    public Slider sensitivitySlider; // Assign this in the Inspector
 
     private Rigidbody rb;
     private float cameraPitch = 0f;
@@ -33,18 +35,28 @@ public class Movement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
-        if (!playerCamera)
-            Debug.LogError("Player Camera not assigned!");
+        // Auto-assign MainCamera if not assigned
+        if (playerCamera == null)
+        {
+            playerCamera = Camera.main;
+            if (playerCamera == null)
+                Debug.LogError("No camera assigned and no MainCamera found in scene!");
+        }
 
         if (!groundCheck)
             Debug.LogError("GroundCheck transform not assigned!");
 
-        // Load saved sensitivity
+        // Load saved sensitivity (default 8)
         turnSpeed = PlayerPrefs.GetFloat("currentSensitivity", 8f);
 
-        // Update slider if assigned
         if (sensitivitySlider != null)
-            sensitivitySlider.value = turnSpeed / 10f;
+        {
+            sensitivitySlider.minValue = 1f;
+            sensitivitySlider.maxValue = 20f;
+            sensitivitySlider.wholeNumbers = false;
+            sensitivitySlider.value = turnSpeed;
+            sensitivitySlider.onValueChanged.AddListener(AdjustSensitivity);
+        }
 
         originalCameraY = playerCamera.transform.localPosition.y;
 
@@ -70,8 +82,10 @@ public class Movement : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * turnSpeed;
         float mouseY = Input.GetAxis("Mouse Y") * turnSpeed;
 
+        // Rotate player body left-right
         transform.Rotate(Vector3.up * mouseX);
 
+        // Rotate camera up-down
         cameraPitch -= mouseY;
         cameraPitch = Mathf.Clamp(cameraPitch, -80f, 80f);
         playerCamera.transform.localEulerAngles = new Vector3(cameraPitch, 0f, 0f);
@@ -98,10 +112,7 @@ public class Movement : MonoBehaviour
                 if (CanStandUp())
                     Uncrouch();
                 else
-                {
-                    Debug.Log("Blocked above, cannot uncrouch to jump.");
                     return;
-                }
             }
 
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
@@ -117,8 +128,6 @@ public class Movement : MonoBehaviour
             {
                 if (CanStandUp())
                     Uncrouch();
-                else
-                    Debug.Log("Blocked above, cannot stand up.");
             }
             else
             {
@@ -137,7 +146,7 @@ public class Movement : MonoBehaviour
 
     bool CanStandUp()
     {
-        float checkDistance = (standingHeight - crouchingHeight);
+        float checkDistance = standingHeight - crouchingHeight;
         Vector3 rayOrigin = transform.position + Vector3.up * (crouchingHeight * 0.5f);
         return !Physics.Raycast(rayOrigin, Vector3.up, checkDistance);
     }
@@ -168,13 +177,12 @@ public class Movement : MonoBehaviour
         playerCamera.transform.localPosition = camPos;
     }
 
-    // 📌 Called by the Slider OnValueChanged
-    public void AdjustSpeed(float newSpeed)
+    public void AdjustSensitivity(float newSensitivity)
     {
-        turnSpeed = newSpeed * 10f;
+        turnSpeed = newSensitivity;
         PlayerPrefs.SetFloat("currentSensitivity", turnSpeed);
         PlayerPrefs.Save();
-        Debug.Log("Updated turnSpeed to: " + turnSpeed);
+        Debug.Log("Sensitivity updated to: " + turnSpeed);
     }
 
     void OnDrawGizmosSelected()
