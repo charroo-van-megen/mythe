@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Movement : MonoBehaviour
 {
     public float moveSpeed = 10f;
     public float crouchSpeed = 4f;
-    public float turnSpeed = 8f;
+    public float turnSpeed = 8f; // This is the value we will control with the slider
     public float jumpForce = 6f;
 
     public Camera playerCamera;
@@ -13,9 +14,13 @@ public class Movement : MonoBehaviour
     public float crouchingHeight = 1f;
     public KeyCode crouchKey = KeyCode.LeftControl;
 
+    [Tooltip("Assign a Transform placed slightly below the player")]
     public Transform groundCheck;
+
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
+
+    public Slider sensitivitySlider; // Assign this in the Inspector
 
     private Rigidbody rb;
     private float cameraPitch = 0f;
@@ -28,7 +33,19 @@ public class Movement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
-        if (!playerCamera) Debug.LogError("Player Camera not assigned!");
+        if (!playerCamera)
+            Debug.LogError("Player Camera not assigned!");
+
+        if (!groundCheck)
+            Debug.LogError("GroundCheck transform not assigned!");
+
+        // Load saved sensitivity
+        turnSpeed = PlayerPrefs.GetFloat("currentSensitivity", 8f);
+
+        // Update slider if assigned
+        if (sensitivitySlider != null)
+            sensitivitySlider.value = turnSpeed / 10f;
+
         originalCameraY = playerCamera.transform.localPosition.y;
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -69,8 +86,6 @@ public class Movement : MonoBehaviour
         float speed = isCrouching ? crouchSpeed : moveSpeed;
 
         Vector3 move = transform.TransformDirection(inputDir) * speed * Time.fixedDeltaTime;
-
-        
         rb.MovePosition(rb.position + move);
     }
 
@@ -78,13 +93,10 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            // If crouching, try to stand first
             if (isCrouching)
             {
                 if (CanStandUp())
-                {
-                    Uncrouch(); // <-- Fix: Immediately return to normal height
-                }
+                    Uncrouch();
                 else
                 {
                     Debug.Log("Blocked above, cannot uncrouch to jump.");
@@ -117,7 +129,10 @@ public class Movement : MonoBehaviour
 
     void CheckGround()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (groundCheck != null)
+        {
+            isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        }
     }
 
     bool CanStandUp()
@@ -151,5 +166,23 @@ public class Movement : MonoBehaviour
         Vector3 camPos = playerCamera.transform.localPosition;
         camPos.y = originalCameraY;
         playerCamera.transform.localPosition = camPos;
+    }
+
+    // 📌 Called by the Slider OnValueChanged
+    public void AdjustSpeed(float newSpeed)
+    {
+        turnSpeed = newSpeed * 10f;
+        PlayerPrefs.SetFloat("currentSensitivity", turnSpeed);
+        PlayerPrefs.Save();
+        Debug.Log("Updated turnSpeed to: " + turnSpeed);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+        }
     }
 }
