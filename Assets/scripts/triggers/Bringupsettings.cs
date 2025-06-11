@@ -2,18 +2,22 @@ using UnityEngine;
 
 public class Bringupsettings : MonoBehaviour
 {
-    public GameObject setting;
-    public bool issettingactive;
-
-    private MouseLook mouseLook;
+    public GameObject setting;               // The settings UI panel
+    public bool issettingactive = false;     // Is settings UI open?
+    public Movement movementScript;          // Reference to Movement script
 
     void Start()
     {
-        mouseLook = GetComponent<MouseLook>();
-        if (mouseLook == null)
+        if (movementScript == null)
         {
-            Debug.LogError("MouseLook component not found on this GameObject.");
+            movementScript = FindObjectOfType<Movement>();
+
+            if (movementScript == null)
+                Debug.LogError("Movement script reference not assigned and not found in scene!");
         }
+
+        if (setting != null)
+            setting.SetActive(false);
     }
 
     void Update()
@@ -29,25 +33,39 @@ public class Bringupsettings : MonoBehaviour
 
     public void Pause()
     {
-        setting.SetActive(true);
+        if (setting != null)
+            setting.SetActive(true);
+
         issettingactive = true;
 
+        // Freeze time
+        Time.timeScale = 0f;
+
+        // Unlock cursor
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (mouseLook != null)
-            mouseLook.SetPaused(true);
+        // Disable movement & camera
+        if (movementScript != null)
+            movementScript.enabled = false;
     }
 
     public void Resume()
     {
-        setting.SetActive(false);
+        if (setting != null)
+            setting.SetActive(false);
+
         issettingactive = false;
 
+        // Resume time
+        Time.timeScale = 1f;
+
+        // Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        if (mouseLook != null)
-            mouseLook.SetPaused(false);
+        // Re-enable movement & camera
+        if (movementScript != null)
+            movementScript.enabled = true;
     }
 }
