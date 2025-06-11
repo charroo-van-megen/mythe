@@ -5,12 +5,12 @@ TagManager:
   serializedVersion: 3
   tags:
   - Ground
-  - PlayerCamera
+  - test
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - Water
   - Water
   - UI
   - 
