@@ -1,13 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class New_Movement : MonoBehaviour
 {
-    public float moveSpeed = 10f;
+    public float moveSpeed = 5f;
     public float crouchSpeed = 4f;
-    public float turnSpeed = 8f;
+    public float turnSpeed = 6f;
     public float jumpHeight = 1.2f;
     public float gravity = -9.81f;
+    public AudioSource WalkingSFX;
+
 
     public Camera playerCamera;
     public float standingHeight = 2f;
@@ -77,9 +79,22 @@ public class New_Movement : MonoBehaviour
 
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f; // small downward force to keep grounded
+            velocity.y = -2f;
+        }
+
+        // 🎵 Control walking SFX
+        if (isGrounded && inputDir.magnitude > 0.1f)
+        {
+            if (!WalkingSFX.isPlaying)
+                WalkingSFX.Play();
+        }
+        else
+        {
+            if (WalkingSFX.isPlaying)
+                WalkingSFX.Pause();
         }
     }
+
 
     void HandleJump()
     {
