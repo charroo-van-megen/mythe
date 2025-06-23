@@ -9,9 +9,15 @@ public class ScaleKey : MonoBehaviour
     public GameObject TwoScale;
     public GameObject ThreeScale;
     public GameObject CannotPlaceScaleText;
-    public GameObject ScaleKeyShowOne;
+
+    //scales on lock
+    public GameObject  ScaleKeyShowOne;
     public GameObject ScaleKeyShowTwo;
     public GameObject ScaleKeyShowThree;
+
+    //for handling the keys
+    public GameObject[] scalesInHand;
+    public GameObject[] scalesOnPedestal;
 
     public int GivenAKey;
 
@@ -26,6 +32,9 @@ public class ScaleKey : MonoBehaviour
         ScaleKeyShowOne.SetActive(false);
         ScaleKeyShowTwo.SetActive(false);
         ScaleKeyShowThree.SetActive(false);
+
+        scalesInHand = new GameObject[] { Scale, TwoScale, ThreeScale };
+        scalesOnPedestal = new GameObject[] { ScaleKeyShowOne, ScaleKeyShowTwo, ScaleKeyShowThree };
     }
 
     private void OnTriggerStay(Collider other)
@@ -46,28 +55,15 @@ public class ScaleKey : MonoBehaviour
                 {
                     
                     GivenAKey++;
+                    Inventory.Keys--;
                     Debug.Log("Placed a scale! GivenAKey: " + GivenAKey);
 
-                    if (Inventory.Keys == 1)
+                    for (int i = 0; i < scalesInHand.Length; i++)
                     {
-                        Scale.gameObject.SetActive(false);
-                        ScaleKeyShowOne.SetActive(true);
-                    
-                    }
-                                                 
-                    if(Inventory.Keys == 2)
-                    {
-                        TwoScale.gameObject.SetActive(false);
-                        ScaleKeyShowTwo.SetActive(true);
-                    
+                        scalesInHand[i].SetActive(  (i+1)<= Inventory.Keys);
+                        scalesOnPedestal[i].SetActive((i + 1) <= GivenAKey);
                     }
 
-                    if (Inventory.Keys == 3)
-                    {
-                        ThreeScale.gameObject.SetActive(false);
-                        ScaleKeyShowThree.SetActive(true);
-                    }
-                    Inventory.Keys--;
                 }
 
                 if (GivenAKey == 3)
