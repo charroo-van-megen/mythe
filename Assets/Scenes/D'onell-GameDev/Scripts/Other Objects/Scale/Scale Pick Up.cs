@@ -6,6 +6,7 @@ public class ScalePickUp : MonoBehaviour
     public GameObject TwoScale;
     public GameObject ThreeScale;
     public GameObject PickUpScaleText;
+    public GameObject Jellyfish;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -15,6 +16,8 @@ public class ScalePickUp : MonoBehaviour
         ThreeScale.SetActive(false);
 
         PickUpScaleText.SetActive(false);
+
+        Jellyfish.SetActive(false);
 
         Inventory.Keys = 0;
     }
@@ -49,6 +52,8 @@ public class ScalePickUp : MonoBehaviour
                 if (Inventory.Keys == 3)
                 {
                     ThreeScale.gameObject.SetActive(true);
+
+                    Jellyfish.SetActive(true);
                 }
 
                 Debug.Log("You got a scale!" + Inventory.Keys);
