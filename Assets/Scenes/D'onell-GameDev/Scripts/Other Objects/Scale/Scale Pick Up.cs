@@ -28,7 +28,7 @@ public class ScalePickUp : MonoBehaviour
             PickUpScaleText.SetActive(true);
 
 // PICK UP SCALE
-            if(Input.GetKeyDown(KeyCode.E))
+            if(Input.GetKey(KeyCode.E))
             {
                 this.gameObject.SetActive(false);
 
