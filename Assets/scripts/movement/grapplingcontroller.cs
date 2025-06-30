@@ -1,31 +1,44 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerGrapplingController : MonoBehaviour
 {
     private Rigidbody rb;
-    private bool enableMovementOnNextTouch;
-    private Vector3 _pendingVelocity;
-
     public PlayerCam cam;
+
     public float grappleFov = 95f;
+    private bool enableMovementOnNextTouch = false;
+    private Vector3 _pendingVelocity;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
     }
 
-    public void JumpToPosition(Vector3 target, float height)
+    public void JumpToPosition(Vector3 target, float arcHeight)
     {
-        _pendingVelocity = CalculateJumpVelocity(transform.position, target, height);
-        Invoke(nameof(SetVelocity), 0.1f);
-        Invoke(nameof(ResetFov), 3f);
+        _pendingVelocity = CalculateJumpVelocity(transform.position, target, arcHeight);
+
+        if (IsVelocityValid(_pendingVelocity))
+        {
+            Invoke(nameof(SetVelocity), 0.1f);
+            Invoke(nameof(ResetFov), 3f);
+        }
+        else
+        {
+            Debug.LogWarning("Invalid grapple velocity calculated (NaN). Check arcHeight and target position.");
+        }
     }
 
     private void SetVelocity()
     {
         enableMovementOnNextTouch = true;
-        rb.linearVelocity = _pendingVelocity; // Use linearVelocity instead of velocity
-        cam?.DoFov(grappleFov);
+
+        if (IsVelocityValid(_pendingVelocity))
+        {
+            rb.linearVelocity = _pendingVelocity;
+            cam?.DoFov(grappleFov);
+        }
     }
 
     public void ResetFov()
@@ -42,15 +55,32 @@ public class PlayerGrapplingController : MonoBehaviour
         }
     }
 
-    public Vector3 CalculateJumpVelocity(Vector3 start, Vector3 end, float height)
+    public Vector3 CalculateJumpVelocity(Vector3 start, Vector3 end, float arcHeight)
     {
-        float gravity = Physics.gravity.y;
-        float displacementY = end.y - start.y;
-        Vector3 displacementXZ = new Vector3(end.x - start.x, 0f, end.z - start.z);
+        Vector3 toTarget = end - start;
+        Vector3 toTargetXZ = new Vector3(toTarget.x, 0f, toTarget.z);
+        float xzDistance = toTargetXZ.magnitude;
+        float yOffset = toTarget.y;
+        float gravity = Mathf.Abs(Physics.gravity.y);
 
-        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * height);
-        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * height / gravity) + Mathf.Sqrt(2 * (displacementY - height) / gravity));
+        // Clamp arc height and vertical offset
+        arcHeight = Mathf.Max(arcHeight, 0.1f);
+        float heightDifference = Mathf.Max(yOffset - arcHeight, 0.1f);
+
+        float timeUp = Mathf.Sqrt(2 * arcHeight / gravity);
+        float timeDown = Mathf.Sqrt(2 * heightDifference / gravity);
+        float totalTime = timeUp + timeDown;
+
+        if (totalTime < 0.1f) totalTime = 0.1f;
+
+        Vector3 velocityY = Vector3.up * Mathf.Sqrt(2 * gravity * arcHeight);
+        Vector3 velocityXZ = toTargetXZ / totalTime;
 
         return velocityXZ + velocityY;
+    }
+
+    private bool IsVelocityValid(Vector3 velocity)
+    {
+        return !(float.IsNaN(velocity.x) || float.IsNaN(velocity.y) || float.IsNaN(velocity.z));
     }
 }

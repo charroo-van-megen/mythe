@@ -4,113 +4,79 @@ using UnityEngine;
 public class Grappling : MonoBehaviour
 {
     [Header("References")]
-    public Transform cam;
-    public Transform gunTip;
-    public LayerMask whatIsGrappleable;
-    public LineRenderer lr;
+    public Transform firePoint;
+    public LineRenderer lineRenderer;
+    public Camera playerCamera;
 
     [Header("Settings")]
-    public float maxGrappleDistance = 40f;
-    public float grappleDelayTime = 0.2f;
-    public float overshootYAxis = 5f;
+    public float maxGrappleDistance = 50f;
+    public float arcHeight = 8f;
     public float cooldown = 2f;
     public KeyCode grappleKey = KeyCode.Mouse1;
+    public LayerMask grappleLayer;
 
-    private Rigidbody rb;
+    private float cooldownTimer = 0f;
+    private bool isGrappling = false;
+    private Vector3 grapplePoint;
+
     private PlayerGrapplingController grapplingController;
 
-    private Vector3 grapplePoint;
-    private float cooldownTimer;
-    private bool isGrappling;
-
-    private void Awake()
+    void Awake()
     {
-        rb = GetComponent<Rigidbody>();
         grapplingController = GetComponent<PlayerGrapplingController>();
 
-        if (lr != null)
-        {
-            lr.enabled = false;
-        }
+        if (lineRenderer != null)
+            lineRenderer.enabled = false;
+
+        if (playerCamera == null)
+            playerCamera = Camera.main;
     }
 
-    private void Update()
+    void Update()
     {
         cooldownTimer -= Time.deltaTime;
 
         if (Input.GetKeyDown(grappleKey) && cooldownTimer <= 0f && !isGrappling)
         {
-            StartGrapple();
+            TryStartGrapple();
         }
-    }
 
-    private void LateUpdate()
-    {
-        if (isGrappling && lr != null && lr.enabled)
+        if (isGrappling && lineRenderer != null)
         {
-            lr.SetPosition(0, gunTip.position);
-            lr.SetPosition(1, grapplePoint);
+            lineRenderer.SetPosition(0, firePoint.position);
+            lineRenderer.SetPosition(1, grapplePoint);
         }
     }
 
-    private void StartGrapple()
+    void TryStartGrapple()
     {
-        if (isGrappling || lr == null || grapplingController == null)
-            return;
-
-        isGrappling = true;
-        FreezePlayerMovement(true);  // Freeze movement when grappling
-
-        RaycastHit hit;
-        if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, maxGrappleDistance, grappleLayer))
         {
             grapplePoint = hit.point;
-            lr.startColor = Color.green;
+            isGrappling = true;
+            cooldownTimer = cooldown;
+
+            grapplingController.JumpToPosition(grapplePoint, arcHeight);
+
+            if (lineRenderer != null)
+            {
+                lineRenderer.enabled = true;
+                lineRenderer.positionCount = 2;
+                lineRenderer.SetPosition(0, firePoint.position);
+                lineRenderer.SetPosition(1, grapplePoint);
+            }
+
+            // Stop grapple after time
+            Invoke(nameof(StopGrapple), 3f);
         }
-        else
-        {
-            StopGrapple(); // No valid target, cancel grapple
-            return;
-        }
-
-        lr.SetPosition(0, gunTip.position);
-        lr.SetPosition(1, grapplePoint);
-        lr.enabled = true;
-
-        cooldownTimer = cooldown;
-
-        Invoke(nameof(ExecuteGrapple), grappleDelayTime);
-    }
-
-    private void ExecuteGrapple()
-    {
-        FreezePlayerMovement(false);  // Unfreeze movement after grapple execution
-        float relativeY = grapplePoint.y - (transform.position.y - 1f);
-        float arcHeight = relativeY > 0 ? relativeY + overshootYAxis : overshootYAxis;
-
-        grapplingController.JumpToPosition(grapplePoint, arcHeight);
     }
 
     public void StopGrapple()
     {
         isGrappling = false;
-        FreezePlayerMovement(false);  // Unfreeze player movement
-        grapplingController.ResetFov();
 
-        if (lr != null)
-        {
-            lr.enabled = false;
-        }
-    }
-
-    public bool IsGrappling() => isGrappling;
-    public Vector3 GetGrapplePoint() => grapplePoint;
-
-    private void FreezePlayerMovement(bool freeze)
-    {
-        if (rb != null)
-        {
-            rb.isKinematic = freeze;  // Disable Rigidbody physics when freezing the player
-        }
+        if (lineRenderer != null)
+            lineRenderer.enabled = false;
     }
 }
