@@ -1742,6 +1742,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 1db1c7d791819f2488872ea0d7e5e3c2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 4402b76d19af1e0429d45e11304da699, type: 2}
     - target: {fileID: 919132149155446097, guid: 1db1c7d791819f2488872ea0d7e5e3c2, type: 3}
       propertyPath: m_Name
       value: huis_Fiene (1)
@@ -2581,6 +2585,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 5d8a053e40f01664fb25a5c39de1294c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8313828418bf5ef48b455c864331c21c, type: 2}
     - target: {fileID: 919132149155446097, guid: 5d8a053e40f01664fb25a5c39de1294c, type: 3}
       propertyPath: m_Name
       value: pilareiland
@@ -4556,6 +4564,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 1db1c7d791819f2488872ea0d7e5e3c2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 73486beaab354d6458a11754c25bc5f7, type: 2}
     - target: {fileID: 919132149155446097, guid: 1db1c7d791819f2488872ea0d7e5e3c2, type: 3}
       propertyPath: m_Name
       value: huis_Fiene
@@ -5252,6 +5264,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 733f39a13a5dfa9419fabfebbdfdcab2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8313828418bf5ef48b455c864331c21c, type: 2}
     - target: {fileID: 919132149155446097, guid: 733f39a13a5dfa9419fabfebbdfdcab2, type: 3}
       propertyPath: m_Name
       value: eiland
@@ -8674,6 +8690,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 33bfa617333cd404ea64290d918618d0, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 4ee1cc00ecba68047b1823e879394f86, type: 2}
     - target: {fileID: 919132149155446097, guid: 33bfa617333cd404ea64290d918618d0, type: 3}
       propertyPath: m_Name
       value: pad
