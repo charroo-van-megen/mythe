@@ -906,6 +906,7 @@ MonoBehaviour:
   TwoScale: {fileID: 1345825820}
   ThreeScale: {fileID: 39001309}
   PickUpScaleText: {fileID: 985614067}
+  Jellyfish: {fileID: 1680246371}
 --- !u!65 &400940110
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1623,6 +1624,7 @@ MonoBehaviour:
   TwoScale: {fileID: 91256399}
   ThreeScale: {fileID: 1900399330}
   PickUpScaleText: {fileID: 985614067}
+  Jellyfish: {fileID: 0}
 --- !u!65 &861679862
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1748,6 +1750,7 @@ MonoBehaviour:
   TwoScale: {fileID: 1345825820}
   ThreeScale: {fileID: 39001309}
   PickUpScaleText: {fileID: 985614067}
+  Jellyfish: {fileID: 1680246371}
 --- !u!65 &964042837
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2335,6 +2338,7 @@ MonoBehaviour:
   TwoScale: {fileID: 91256399}
   ThreeScale: {fileID: 1900399330}
   PickUpScaleText: {fileID: 985614067}
+  Jellyfish: {fileID: 0}
 --- !u!1 &1345825820
 GameObject:
   m_ObjectHideFlags: 0
@@ -2600,6 +2604,7 @@ MonoBehaviour:
   TwoScale: {fileID: 91256399}
   ThreeScale: {fileID: 1900399330}
   PickUpScaleText: {fileID: 985614067}
+  Jellyfish: {fileID: 0}
 --- !u!65 &1496737315
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2689,6 +2694,68 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1680246370
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -14.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.9445772
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.26116467
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2802873130572671222, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291602391798198860, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+      propertyPath: m_Name
+      value: jellyfish2.0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+--- !u!1 &1680246371 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3291602391798198860, guid: 3c7c04961e49b6a4f83eae6a35b64e8f, type: 3}
+  m_PrefabInstance: {fileID: 1680246370}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1836830672
 GameObject:
   m_ObjectHideFlags: 0
@@ -3326,6 +3393,7 @@ MonoBehaviour:
   TwoScale: {fileID: 1345825820}
   ThreeScale: {fileID: 39001309}
   PickUpScaleText: {fileID: 985614067}
+  Jellyfish: {fileID: 1680246371}
 --- !u!65 &8649779591360880193
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3365,3 +3433,4 @@ SceneRoots:
   - {fileID: 964042840}
   - {fileID: 400940113}
   - {fileID: 1153443792}
+  - {fileID: 1680246370}

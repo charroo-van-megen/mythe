@@ -71,7 +71,7 @@ public class ScaleKey : MonoBehaviour
                     Locked.locked = false;
                     PlaceScaleText.SetActive(false);
                     CannotPlaceScaleText.SetActive(false);
-                    
+
                     Debug.Log("You Unlocked the gate!");
                 }
             }
