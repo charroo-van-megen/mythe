@@ -21,18 +21,14 @@ public class Grappling : MonoBehaviour
 
     private PlayerGrapplingController grapplingController;
 
-    void Awake()
+    private void Awake()
     {
         grapplingController = GetComponent<PlayerGrapplingController>();
-
-        if (lineRenderer != null)
-            lineRenderer.enabled = false;
-
-        if (playerCamera == null)
-            playerCamera = Camera.main;
+        if (lineRenderer != null) lineRenderer.enabled = false;
+        if (playerCamera == null) playerCamera = Camera.main;
     }
 
-    void Update()
+    private void Update()
     {
         cooldownTimer -= Time.deltaTime;
 
@@ -48,9 +44,11 @@ public class Grappling : MonoBehaviour
         }
     }
 
-    void TryStartGrapple()
+    private void TryStartGrapple()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        Debug.DrawRay(ray.origin, ray.direction * maxGrappleDistance, Color.green, 2f);
+
         if (Physics.Raycast(ray, out RaycastHit hit, maxGrappleDistance, grappleLayer))
         {
             grapplePoint = hit.point;
@@ -67,16 +65,17 @@ public class Grappling : MonoBehaviour
                 lineRenderer.SetPosition(1, grapplePoint);
             }
 
-            // Stop grapple after time
             Invoke(nameof(StopGrapple), 3f);
+        }
+        else
+        {
+            Debug.Log("Nothing hit by grappling ray.");
         }
     }
 
     public void StopGrapple()
     {
         isGrappling = false;
-
-        if (lineRenderer != null)
-            lineRenderer.enabled = false;
+        if (lineRenderer != null) lineRenderer.enabled = false;
     }
 }

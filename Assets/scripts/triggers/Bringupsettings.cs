@@ -7,23 +7,22 @@ public class Bringupsettings : MonoBehaviour
     public GameObject crosshair;
 
     [Header("Script References")]
-    public Movement movementScript;
+    public New_Movement movementScript;
     public Grappling grapplingScript;
     public PlayerGrapplingController grapplingController;
+    public MouseLook mouseLookScript; // NEW
 
     private bool issettingactive = false;
 
     void Start()
     {
-        // Auto-assign missing references
-        movementScript ??= FindObjectOfType<Movement>();
+        movementScript ??= FindObjectOfType<New_Movement>();
         grapplingScript ??= FindObjectOfType<Grappling>();
         grapplingController ??= FindObjectOfType<PlayerGrapplingController>();
+        mouseLookScript ??= FindObjectOfType<MouseLook>(); // NEW
 
-        if (setting != null)
-            setting.SetActive(false);
-        if (crosshair != null)
-            crosshair.SetActive(true);
+        setting?.SetActive(false);
+        crosshair?.SetActive(true);
     }
 
     void Update()
@@ -52,16 +51,18 @@ public class Bringupsettings : MonoBehaviour
 
         if (grapplingScript != null)
         {
-            grapplingScript.StopGrapple();      // Safely stop any ongoing grapple
-            grapplingScript.enabled = false;    // Disable grappling input
+            grapplingScript.StopGrapple();
+            grapplingScript.enabled = false;
         }
 
         if (grapplingController != null)
         {
             var rb = grapplingController.GetComponent<Rigidbody>();
-            if (rb != null)
-                rb.isKinematic = true;          // Freeze physics
+            if (rb != null) rb.isKinematic = true;
         }
+
+        if (mouseLookScript != null)
+            mouseLookScript.SetPaused(true);
     }
 
     public void Resume()
@@ -71,8 +72,9 @@ public class Bringupsettings : MonoBehaviour
 
         issettingactive = false;
         Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Remove these cursor calls here because MouseLook.SetPaused(false) will handle locking
+        // Cursor.lockState = CursorLockMode.Locked;
+        // Cursor.visible = false;
 
         if (movementScript != null)
             movementScript.enabled = true;
@@ -83,8 +85,10 @@ public class Bringupsettings : MonoBehaviour
         if (grapplingController != null)
         {
             var rb = grapplingController.GetComponent<Rigidbody>();
-            if (rb != null)
-                rb.isKinematic = false;         // Resume physics
+            if (rb != null) rb.isKinematic = false;
         }
+
+        if (mouseLookScript != null)
+            mouseLookScript.SetPaused(false);  // This will call LockCursor internally
     }
 }

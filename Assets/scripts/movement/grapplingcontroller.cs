@@ -1,27 +1,27 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class PlayerGrapplingController : MonoBehaviour
 {
-    private Rigidbody rb;
+    public New_Movement movementScript;  // Reference to your movement script
     public PlayerCam cam;
 
     public float grappleFov = 95f;
-    private bool enableMovementOnNextTouch = false;
-    private Vector3 _pendingVelocity;
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
+        if (movementScript == null)
+            movementScript = GetComponent<New_Movement>();
     }
 
     public void JumpToPosition(Vector3 target, float arcHeight)
     {
-        _pendingVelocity = CalculateJumpVelocity(transform.position, target, arcHeight);
+        Vector3 launchVelocity = CalculateJumpVelocity(transform.position, target, arcHeight);
 
-        if (IsVelocityValid(_pendingVelocity))
+        if (IsVelocityValid(launchVelocity))
         {
-            Invoke(nameof(SetVelocity), 0.1f);
+            movementScript.AddLaunchVelocity(launchVelocity);
+
+            cam?.DoFov(grappleFov);
             Invoke(nameof(ResetFov), 3f);
         }
         else
@@ -30,40 +30,18 @@ public class PlayerGrapplingController : MonoBehaviour
         }
     }
 
-    private void SetVelocity()
-    {
-        enableMovementOnNextTouch = true;
-
-        if (IsVelocityValid(_pendingVelocity))
-        {
-            rb.linearVelocity = _pendingVelocity;
-            cam?.DoFov(grappleFov);
-        }
-    }
-
     public void ResetFov()
     {
         cam?.DoFov(85f);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (enableMovementOnNextTouch)
-        {
-            enableMovementOnNextTouch = false;
-            GetComponent<Grappling>()?.StopGrapple();
-        }
     }
 
     public Vector3 CalculateJumpVelocity(Vector3 start, Vector3 end, float arcHeight)
     {
         Vector3 toTarget = end - start;
         Vector3 toTargetXZ = new Vector3(toTarget.x, 0f, toTarget.z);
-        float xzDistance = toTargetXZ.magnitude;
         float yOffset = toTarget.y;
         float gravity = Mathf.Abs(Physics.gravity.y);
 
-        // Clamp arc height and vertical offset
         arcHeight = Mathf.Max(arcHeight, 0.1f);
         float heightDifference = Mathf.Max(yOffset - arcHeight, 0.1f);
 
