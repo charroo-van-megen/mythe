@@ -29,8 +29,8 @@ public class MouseLook : MonoBehaviour
     {
         if (isPaused) return;
 
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.unscaledDeltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.unscaledDeltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -42,21 +42,12 @@ public class MouseLook : MonoBehaviour
     public void UpdateSensitivity(float newSensitivity)
     {
         mouseSensitivity = newSensitivity;
+        Debug.Log("MouseLook received new sensitivity: " + mouseSensitivity);
     }
 
     public void SetPaused(bool paused)
     {
         isPaused = paused;
-
-        if (paused)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            LockCursor();
-        }
     }
 
     public void LockCursor()
@@ -68,6 +59,8 @@ public class MouseLook : MonoBehaviour
     void OnDestroy()
     {
         if (cameraSensitivity != null)
+        {
             cameraSensitivity.OnSensitivityChanged -= UpdateSensitivity;
+        }
     }
 }

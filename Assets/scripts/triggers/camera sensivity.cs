@@ -5,7 +5,7 @@ public class CameraSensitivity : MonoBehaviour
 {
     [Header("Sensitivity Settings")]
     public Slider sensitivitySlider;  // Assign in Inspector
-    public float defaultSensitivity = 100f;  // Increased default value
+    public float defaultSensitivity = 10f;
     private const string sensitivityKey = "currentSensitivity";
 
     public float CurrentSensitivity { get; private set; }
@@ -14,27 +14,24 @@ public class CameraSensitivity : MonoBehaviour
 
     void Start()
     {
-        // Load saved sensitivity or use default
+        // Load saved sensitivity or default
         CurrentSensitivity = PlayerPrefs.GetFloat(sensitivityKey, defaultSensitivity);
-        CurrentSensitivity = Mathf.Max(0.1f, CurrentSensitivity); // Prevent zero or negative
+        CurrentSensitivity = Mathf.Max(0.1f, CurrentSensitivity); // Prevent zero
 
         if (sensitivitySlider != null)
         {
-            sensitivitySlider.minValue = 50f;    // Increased min
-            sensitivitySlider.maxValue = 500f;   // Increased max
-            sensitivitySlider.wholeNumbers = false; // Allows fine-tuning
+            sensitivitySlider.minValue = 1f;
+            sensitivitySlider.maxValue = 20f;
+            sensitivitySlider.wholeNumbers = true;
             sensitivitySlider.value = CurrentSensitivity;
 
             sensitivitySlider.onValueChanged.AddListener(UpdateSensitivity);
         }
-
-        // Notify any listeners (in case they initialize late)
-        OnSensitivityChanged?.Invoke(CurrentSensitivity);
     }
 
     private void UpdateSensitivity(float value)
     {
-        CurrentSensitivity = Mathf.Max(0.1f, value);
+        CurrentSensitivity = Mathf.Max(0.1f, value);  // Clamp to prevent zero
         PlayerPrefs.SetFloat(sensitivityKey, CurrentSensitivity);
         PlayerPrefs.Save();
 
