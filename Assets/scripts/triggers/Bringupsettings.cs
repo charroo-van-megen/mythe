@@ -3,8 +3,8 @@ using UnityEngine;
 public class Bringupsettings : MonoBehaviour
 {
     [Header("UI References")]
-    public GameObject setting;     // Assign in Inspector
-    public GameObject crosshair;   // Assign in Inspector
+    public GameObject setting;
+    public GameObject crosshair;
 
     [Header("Script References")]
     public New_Movement movementScript;
@@ -13,20 +13,17 @@ public class Bringupsettings : MonoBehaviour
     public MouseLook mouseLookScript;
 
     private bool isSettingsActive = false;
+    private bool wasGrapplingBeforePause = false;
 
     void Start()
     {
-        // Auto-assign references if missing
         movementScript ??= FindObjectOfType<New_Movement>();
         grapplingScript ??= FindObjectOfType<Grappling>();
         grapplingController ??= FindObjectOfType<PlayerGrapplingController>();
         mouseLookScript ??= FindObjectOfType<MouseLook>();
 
-        // Ensure settings UI is hidden and crosshair shown at start
-        if (setting != null)
-            setting.SetActive(false);
-        if (crosshair != null)
-            crosshair.SetActive(true);
+        if (setting != null) setting.SetActive(false);
+        if (crosshair != null) crosshair.SetActive(true);
 
         isSettingsActive = false;
     }
@@ -48,33 +45,40 @@ public class Bringupsettings : MonoBehaviour
         if (crosshair != null) crosshair.SetActive(false);
 
         isSettingsActive = true;
+
+        // Pause time
         Time.timeScale = 0f;
 
+        // Disable movement & grappling scripts
         if (movementScript != null) movementScript.enabled = false;
 
         if (grapplingScript != null)
         {
-            grapplingScript.StopGrapple();
+            wasGrapplingBeforePause = grapplingScript.IsGrappling();
             grapplingScript.enabled = false;
         }
 
+        // Freeze physics
         if (grapplingController != null)
         {
             Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
             if (rb != null) rb.isKinematic = true;
         }
 
+        // Unlock cursor
         if (mouseLookScript != null)
-            mouseLookScript.SetPaused(true);  // This manages cursor lock & visibility now
+            mouseLookScript.SetPaused(true);
     }
 
     public void Resume()
     {
+        isSettingsActive = false;
+
+        // Resume time
+        Time.timeScale = 1f;
+
         if (setting != null) setting.SetActive(false);
         if (crosshair != null) crosshair.SetActive(true);
-
-        isSettingsActive = false;
-        Time.timeScale = 1f;
 
         if (movementScript != null) movementScript.enabled = true;
         if (grapplingScript != null) grapplingScript.enabled = true;
@@ -82,10 +86,35 @@ public class Bringupsettings : MonoBehaviour
         if (grapplingController != null)
         {
             Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
-            if (rb != null) rb.isKinematic = false;
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+
+                // Restore pending velocity if any
+                if (grapplingController.pendingVelocity != Vector3.zero)
+                {
+                    rb.linearVelocity = grapplingController.pendingVelocity;
+                    grapplingController.pendingVelocity = Vector3.zero;
+                }
+            }
         }
 
         if (mouseLookScript != null)
-            mouseLookScript.SetPaused(false);  // This manages cursor lock & visibility now
+            mouseLookScript.SetPaused(false);
+
+        // Restore grappling visual
+        if (wasGrapplingBeforePause && grapplingScript != null && grapplingScript.IsGrappling())
+        {
+            LineRenderer lr = grapplingScript.GetComponent<LineRenderer>();
+            if (lr != null)
+            {
+                lr.enabled = true;
+                lr.positionCount = 2;
+                lr.SetPosition(0, grapplingScript.gunTip.position);
+                lr.SetPosition(1, grapplingScript.GetGrapplePoint());
+            }
+        }
+
+        wasGrapplingBeforePause = false;
     }
 }

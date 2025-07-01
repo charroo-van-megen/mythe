@@ -145,7 +145,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5918422611674050748, guid: a75db77bbca871f409ff17efcf30075e, type: 3}
       propertyPath: jumpHeight
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5918422611674050748, guid: a75db77bbca871f409ff17efcf30075e, type: 3}
       propertyPath: groundMask.m_Bits
@@ -229,7 +229,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9065432410231201743, guid: a75db77bbca871f409ff17efcf30075e, type: 3}
       propertyPath: jumpHeight
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9065432410231201743, guid: a75db77bbca871f409ff17efcf30075e, type: 3}
       propertyPath: groundMask.m_Bits

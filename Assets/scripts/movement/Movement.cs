@@ -10,8 +10,8 @@ public class Movement : MonoBehaviour
     public float jumpForce = 6f;
 
     [Header("Mouse Look Settings")]
-    public float turnSpeed = 8f;  // Sensitivity multiplier
-    public Slider sensitivitySlider;  // Assign in Inspector
+    public float turnSpeed = 8f;
+    public Slider sensitivitySlider;
 
     [Header("Camera & Crouch")]
     public Camera playerCamera;
@@ -35,7 +35,6 @@ public class Movement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
-        // Auto-assign MainCamera if not assigned
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
@@ -46,7 +45,6 @@ public class Movement : MonoBehaviour
         if (!groundCheck)
             Debug.LogError("GroundCheck transform not assigned!");
 
-        // Load saved sensitivity (default 8)
         turnSpeed = PlayerPrefs.GetFloat("currentSensitivity", 8f);
 
         if (sensitivitySlider != null)
@@ -82,10 +80,8 @@ public class Movement : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * turnSpeed;
         float mouseY = Input.GetAxis("Mouse Y") * turnSpeed;
 
-        // Rotate player body left-right
         transform.Rotate(Vector3.up * mouseX);
 
-        // Rotate camera up-down
         cameraPitch -= mouseY;
         cameraPitch = Mathf.Clamp(cameraPitch, -80f, 80f);
         playerCamera.transform.localEulerAngles = new Vector3(cameraPitch, 0f, 0f);
@@ -115,6 +111,7 @@ public class Movement : MonoBehaviour
                     return;
             }
 
+            // ✅ FIXED: use rb.velocity instead of rb.linearVelocity
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
