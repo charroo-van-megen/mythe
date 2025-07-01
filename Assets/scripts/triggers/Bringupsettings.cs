@@ -3,34 +3,39 @@ using UnityEngine;
 public class Bringupsettings : MonoBehaviour
 {
     [Header("UI References")]
-    public GameObject setting;
-    public GameObject crosshair;
+    public GameObject setting;     // Assign in Inspector
+    public GameObject crosshair;   // Assign in Inspector
 
     [Header("Script References")]
-    public New_Movement movementScript; // Only keep New_Movement
+    public New_Movement movementScript;
     public Grappling grapplingScript;
     public PlayerGrapplingController grapplingController;
     public MouseLook mouseLookScript;
 
-    private bool issettingactive = false;
+    private bool isSettingsActive = false;
 
     void Start()
     {
-        // Auto-assign missing references
+        // Auto-assign references if missing
         movementScript ??= FindObjectOfType<New_Movement>();
         grapplingScript ??= FindObjectOfType<Grappling>();
         grapplingController ??= FindObjectOfType<PlayerGrapplingController>();
         mouseLookScript ??= FindObjectOfType<MouseLook>();
 
-        if (setting != null) setting.SetActive(false);
-        if (crosshair != null) crosshair.SetActive(true);
+        // Ensure settings UI is hidden and crosshair shown at start
+        if (setting != null)
+            setting.SetActive(false);
+        if (crosshair != null)
+            crosshair.SetActive(true);
+
+        isSettingsActive = false;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            if (!issettingactive)
+            if (!isSettingsActive)
                 Pause();
             else
                 Resume();
@@ -42,14 +47,10 @@ public class Bringupsettings : MonoBehaviour
         if (setting != null) setting.SetActive(true);
         if (crosshair != null) crosshair.SetActive(false);
 
-        issettingactive = true;
+        isSettingsActive = true;
         Time.timeScale = 0f;
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        if (movementScript != null)
-            movementScript.enabled = false;
+        if (movementScript != null) movementScript.enabled = false;
 
         if (grapplingScript != null)
         {
@@ -59,12 +60,12 @@ public class Bringupsettings : MonoBehaviour
 
         if (grapplingController != null)
         {
-            var rb = grapplingController.GetComponent<Rigidbody>();
+            Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
             if (rb != null) rb.isKinematic = true;
         }
 
         if (mouseLookScript != null)
-            mouseLookScript.SetPaused(true);
+            mouseLookScript.SetPaused(true);  // This manages cursor lock & visibility now
     }
 
     public void Resume()
@@ -72,23 +73,19 @@ public class Bringupsettings : MonoBehaviour
         if (setting != null) setting.SetActive(false);
         if (crosshair != null) crosshair.SetActive(true);
 
-        issettingactive = false;
+        isSettingsActive = false;
         Time.timeScale = 1f;
 
-        // MouseLook handles cursor locking
-        if (movementScript != null)
-            movementScript.enabled = true;
-
-        if (grapplingScript != null)
-            grapplingScript.enabled = true;
+        if (movementScript != null) movementScript.enabled = true;
+        if (grapplingScript != null) grapplingScript.enabled = true;
 
         if (grapplingController != null)
         {
-            var rb = grapplingController.GetComponent<Rigidbody>();
+            Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
             if (rb != null) rb.isKinematic = false;
         }
 
         if (mouseLookScript != null)
-            mouseLookScript.SetPaused(false);
+            mouseLookScript.SetPaused(false);  // This manages cursor lock & visibility now
     }
 }

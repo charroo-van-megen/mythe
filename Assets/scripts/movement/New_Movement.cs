@@ -10,7 +10,6 @@ public class New_Movement : MonoBehaviour
     public float gravity = -9.81f;
     public AudioSource WalkingSFX;
 
-
     public Camera playerCamera;
     public float standingHeight = 2f;
     public float crouchingHeight = 1f;
@@ -24,18 +23,23 @@ public class New_Movement : MonoBehaviour
     private float cameraPitch = 0f;
     private float originalCameraY;
     private bool isCrouching = false;
-    public Vector3 velocity;
     private bool isGrounded;
 
-    
+    private PlayerGrapplingController grapplingController;
+
+    public Vector3 velocity = Vector3.zero; // movement velocity including grapple launch
+
+    [HideInInspector]
+    public bool freezeMovement = false;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        
 
         if (!playerCamera) Debug.LogError("Player Camera not assigned!");
         originalCameraY = playerCamera.transform.localPosition.y;
+
+        grapplingController = GetComponent<PlayerGrapplingController>();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -44,7 +48,10 @@ public class New_Movement : MonoBehaviour
     void Update()
     {
         HandleMouseLook();
-        
+
+        if (freezeMovement)
+            return;
+
         CheckGround();
         HandleJump();
         HandleMovement();
@@ -72,17 +79,42 @@ public class New_Movement : MonoBehaviour
 
         Vector3 move = transform.TransformDirection(inputDir) * speed;
 
+        // Apply grapple launch velocity if any
+        if (grapplingController != null && grapplingController.pendingVelocity != Vector3.zero)
+        {
+            velocity = grapplingController.pendingVelocity;
+            grapplingController.pendingVelocity = Vector3.zero;
+        }
+
         // Apply gravity
         velocity.y += gravity * Time.deltaTime;
 
-        controller.Move((move + velocity) * Time.deltaTime);
-
-        if (isGrounded && velocity.y < 0)
+        if (isGrounded)
         {
-            velocity.y = -2f;
+            if (inputDir.magnitude < 0.1f)
+            {
+                // Smoothly reduce horizontal velocity to zero when no input
+                velocity.x = Mathf.Lerp(velocity.x, 0f, 10f * Time.deltaTime);
+                velocity.z = Mathf.Lerp(velocity.z, 0f, 10f * Time.deltaTime);
+            }
+            else
+            {
+                // Player input overrides grapple horizontal velocity
+                velocity.x = 0f;
+                velocity.z = 0f;
+            }
+
+            if (velocity.y < 0)
+                velocity.y = -2f;  // Keep player grounded
         }
 
-        // 🎵 Control walking SFX
+        // Move horizontally by input + grapple horizontal velocity
+        controller.Move((move + new Vector3(velocity.x, 0f, velocity.z)) * Time.deltaTime);
+
+        // Move vertically by vertical velocity (gravity, jump, grapple)
+        controller.Move(Vector3.up * velocity.y * Time.deltaTime);
+
+        // Walking SFX control
         if (isGrounded && inputDir.magnitude > 0.1f)
         {
             if (!WalkingSFX.isPlaying)
@@ -95,23 +127,16 @@ public class New_Movement : MonoBehaviour
         }
     }
 
-
     void HandleJump()
     {
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            
-
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
     }
-
-    
 
     void CheckGround()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
     }
-
-    
 }

@@ -6,32 +6,38 @@ public class CameraSensitivity : MonoBehaviour
 {
     [Header("Sensitivity Settings")]
     public Slider sensitivitySlider;  // Assign in Inspector
-    public float defaultSensitivity = 100f;  // Single declaration with intended value
+    public float defaultSensitivity = 10f;
 
     private const string sensitivityKey = "currentSensitivity";
     public float CurrentSensitivity { get; private set; }
 
-    // Optional: Other scripts can subscribe to this
     public event Action<float> OnSensitivityChanged;
 
     void Start()
     {
         // Load saved sensitivity or use default
         CurrentSensitivity = PlayerPrefs.GetFloat(sensitivityKey, defaultSensitivity);
-        CurrentSensitivity = Mathf.Max(0.1f, CurrentSensitivity); // Prevent zero or negative
+        CurrentSensitivity = Mathf.Max(0.1f, CurrentSensitivity);
 
         if (sensitivitySlider != null)
         {
-            sensitivitySlider.minValue = 50f;      // Adjusted min
-            sensitivitySlider.maxValue = 500f;     // Adjusted max
-            sensitivitySlider.wholeNumbers = false; // Allow fine adjustment
+            // Set slider range and value
+            sensitivitySlider.minValue = 0.1f;
+            sensitivitySlider.maxValue = 10f;
+            sensitivitySlider.wholeNumbers = false;
             sensitivitySlider.value = CurrentSensitivity;
 
+            // Subscribe to slider change event
             sensitivitySlider.onValueChanged.AddListener(UpdateSensitivity);
         }
+        else
+        {
+            Debug.LogWarning("Sensitivity slider not assigned in CameraSensitivity.");
+        }
 
-        // Notify listeners (like MouseLook) immediately
+        // Notify listeners of initial value
         OnSensitivityChanged?.Invoke(CurrentSensitivity);
+        Debug.Log($"CameraSensitivity initialized with {CurrentSensitivity}");
     }
 
     private void UpdateSensitivity(float value)
@@ -40,6 +46,7 @@ public class CameraSensitivity : MonoBehaviour
         PlayerPrefs.SetFloat(sensitivityKey, CurrentSensitivity);
         PlayerPrefs.Save();
 
+        Debug.Log($"CameraSensitivity changed to {CurrentSensitivity}");
         OnSensitivityChanged?.Invoke(CurrentSensitivity);
     }
 }
