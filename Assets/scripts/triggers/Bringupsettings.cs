@@ -2,29 +2,40 @@ using UnityEngine;
 
 public class Bringupsettings : MonoBehaviour
 {
-    public GameObject setting;               // The settings UI panel
-    public bool issettingactive = false;     // Is settings UI open?
-    public Movement movementScript;          // Reference to Movement script
+    [Header("UI References")]
+    public GameObject setting;     // Assign in Inspector
+    public GameObject crosshair;   // Assign in Inspector
+
+    [Header("Script References")]
+    public New_Movement movementScript;
+    public Grappling grapplingScript;
+    public PlayerGrapplingController grapplingController;
+    public MouseLook mouseLookScript;
+
+    private bool isSettingsActive = false;
 
     void Start()
     {
-        if (movementScript == null)
-        {
-            movementScript = FindObjectOfType<Movement>();
+        // Auto-assign references if missing
+        movementScript ??= FindObjectOfType<New_Movement>();
+        grapplingScript ??= FindObjectOfType<Grappling>();
+        grapplingController ??= FindObjectOfType<PlayerGrapplingController>();
+        mouseLookScript ??= FindObjectOfType<MouseLook>();
 
-            if (movementScript == null)
-                Debug.LogError("Movement script reference not assigned and not found in scene!");
-        }
-
+        // Ensure settings UI is hidden and crosshair shown at start
         if (setting != null)
             setting.SetActive(false);
+        if (crosshair != null)
+            crosshair.SetActive(true);
+
+        isSettingsActive = false;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            if (!issettingactive)
+            if (!isSettingsActive)
                 Pause();
             else
                 Resume();
@@ -33,39 +44,48 @@ public class Bringupsettings : MonoBehaviour
 
     public void Pause()
     {
-        if (setting != null)
-            setting.SetActive(true);
+        if (setting != null) setting.SetActive(true);
+        if (crosshair != null) crosshair.SetActive(false);
 
-        issettingactive = true;
-
-        // Freeze time
+        isSettingsActive = true;
         Time.timeScale = 0f;
 
-        // Unlock cursor
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        if (movementScript != null) movementScript.enabled = false;
 
-        // Disable movement & camera
-        if (movementScript != null)
-            movementScript.enabled = false;
+        if (grapplingScript != null)
+        {
+            grapplingScript.StopGrapple();
+            grapplingScript.enabled = false;
+        }
+
+        if (grapplingController != null)
+        {
+            Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
+            if (rb != null) rb.isKinematic = true;
+        }
+
+        if (mouseLookScript != null)
+            mouseLookScript.SetPaused(true);  // This manages cursor lock & visibility now
     }
 
     public void Resume()
     {
-        if (setting != null)
-            setting.SetActive(false);
+        if (setting != null) setting.SetActive(false);
+        if (crosshair != null) crosshair.SetActive(true);
 
-        issettingactive = false;
-
-        // Resume time
+        isSettingsActive = false;
         Time.timeScale = 1f;
 
-        // Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (movementScript != null) movementScript.enabled = true;
+        if (grapplingScript != null) grapplingScript.enabled = true;
 
-        // Re-enable movement & camera
-        if (movementScript != null)
-            movementScript.enabled = true;
+        if (grapplingController != null)
+        {
+            Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
+            if (rb != null) rb.isKinematic = false;
+        }
+
+        if (mouseLookScript != null)
+            mouseLookScript.SetPaused(false);  // This manages cursor lock & visibility now
     }
 }

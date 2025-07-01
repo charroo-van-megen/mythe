@@ -2,54 +2,43 @@ using UnityEngine;
 
 public class PlayerGrapplingController : MonoBehaviour
 {
-    private Rigidbody rb;
-    private bool enableMovementOnNextTouch;
-    private Vector3 _pendingVelocity;
+    [Header("References")]
+    public Camera cam;
+    public float grappleFov = 100f;
 
-    public PlayerCam cam;
-    public float grappleFov = 95f;
+    [HideInInspector]
+    public Vector3 pendingVelocity = Vector3.zero;
 
-    private void Awake()
+    public void ApplyPendingVelocity(Vector3 velocity)
     {
-        rb = GetComponent<Rigidbody>();
-    }
+        pendingVelocity = velocity;
 
-    public void JumpToPosition(Vector3 target, float height)
-    {
-        _pendingVelocity = CalculateJumpVelocity(transform.position, target, height);
-        Invoke(nameof(SetVelocity), 0.1f);
-        Invoke(nameof(ResetFov), 3f);
-    }
-
-    private void SetVelocity()
-    {
-        enableMovementOnNextTouch = true;
-        rb.linearVelocity = _pendingVelocity; // Use linearVelocity instead of velocity
-        cam?.DoFov(grappleFov);
+        if (cam != null)
+            cam.fieldOfView = grappleFov;
     }
 
     public void ResetFov()
     {
-        cam?.DoFov(85f);
+        if (cam != null)
+            cam.fieldOfView = 85f;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    public Vector3 CalculateJumpVelocity(Vector3 start, Vector3 end, float arcHeight)
     {
-        if (enableMovementOnNextTouch)
-        {
-            enableMovementOnNextTouch = false;
-            GetComponent<Grappling>()?.StopGrapple();
-        }
-    }
+        Vector3 toTarget = end - start;
+        Vector3 toTargetXZ = new Vector3(toTarget.x, 0f, toTarget.z);
+        float xzDistance = toTargetXZ.magnitude;
+        float yOffset = toTarget.y;
 
-    public Vector3 CalculateJumpVelocity(Vector3 start, Vector3 end, float height)
-    {
-        float gravity = Physics.gravity.y;
-        float displacementY = end.y - start.y;
-        Vector3 displacementXZ = new Vector3(end.x - start.x, 0f, end.z - start.z);
+        float gravity = Mathf.Abs(Physics.gravity.y);
+        arcHeight = Mathf.Max(arcHeight, 0.1f);
 
-        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * height);
-        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * height / gravity) + Mathf.Sqrt(2 * (displacementY - height) / gravity));
+        float timeToApex = Mathf.Sqrt(2 * arcHeight / gravity);
+        float timeFromApex = Mathf.Sqrt(2 * Mathf.Max(arcHeight - yOffset, 0.1f) / gravity);
+        float totalTime = timeToApex + timeFromApex;
+
+        Vector3 velocityY = Vector3.up * Mathf.Sqrt(2 * gravity * arcHeight);
+        Vector3 velocityXZ = toTargetXZ / totalTime;
 
         return velocityXZ + velocityY;
     }
