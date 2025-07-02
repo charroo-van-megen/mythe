@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/D'onell-GameDev/D'onell-Scenes/Game.unity
-    guid: be25298215ecbf44d9a62fdfeacd78af
+    path: Assets/Scenes/D'onell-GameDev/D'onell-Scenes/Main Menu.unity
+    guid: 2fac96a939d732f469f5f64ec0f17a9e
   - enabled: 1
     path: Assets/Scenes/LV1.unity
     guid: 8f096a5ff838f95449a9c9479ebc319b
