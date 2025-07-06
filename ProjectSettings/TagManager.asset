@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Ground
   - test
+  - Scale
+  - Death Zone
+  - New tag
   layers:
   - Default
   - TransparentFX
