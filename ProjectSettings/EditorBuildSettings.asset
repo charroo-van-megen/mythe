@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LV1 1 (TEXTURES).unity
     guid: cbe020deb6cc49c4987bc3c519a48790
+  - enabled: 1
+    path: Assets/Scenes/D'onell-GameDev/D'onell-Scenes/End Credits.unity
+    guid: d466c07e698cb8c4a9c8c903e96db50d
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

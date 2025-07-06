@@ -9,6 +9,7 @@ TagManager:
   - Scale
   - Death Zone
   - New tag
+  - Orb
   layers:
   - Default
   - TransparentFX
