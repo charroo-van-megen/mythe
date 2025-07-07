@@ -2,29 +2,37 @@ using UnityEngine;
 
 public class Bringupsettings : MonoBehaviour
 {
-    public GameObject setting;               // The settings UI panel
-    public bool issettingactive = false;     // Is settings UI open?
-    public Movement movementScript;          // Reference to Movement script
+    [Header("UI References")]
+    public GameObject setting;
+    public GameObject crosshair;
+
+    [Header("Script References")]
+    public New_Movement movementScript;
+    public Grappling grapplingScript;
+    public PlayerGrapplingController grapplingController;
+    public MouseLook mouseLookScript;
+
+    private bool isSettingsActive = false;
+    private bool wasGrapplingBeforePause = false;
 
     void Start()
     {
-        if (movementScript == null)
-        {
-            movementScript = FindObjectOfType<Movement>();
+        movementScript ??= FindObjectOfType<New_Movement>();
+        grapplingScript ??= FindObjectOfType<Grappling>();
+        grapplingController ??= FindObjectOfType<PlayerGrapplingController>();
+        mouseLookScript ??= FindObjectOfType<MouseLook>();
 
-            if (movementScript == null)
-                Debug.LogError("Movement script reference not assigned and not found in scene!");
-        }
+        if (setting != null) setting.SetActive(false);
+        if (crosshair != null) crosshair.SetActive(true);
 
-        if (setting != null)
-            setting.SetActive(false);
+        isSettingsActive = false;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            if (!issettingactive)
+            if (!isSettingsActive)
                 Pause();
             else
                 Resume();
@@ -33,39 +41,80 @@ public class Bringupsettings : MonoBehaviour
 
     public void Pause()
     {
-        if (setting != null)
-            setting.SetActive(true);
+        if (setting != null) setting.SetActive(true);
+        if (crosshair != null) crosshair.SetActive(false);
 
-        issettingactive = true;
+        isSettingsActive = true;
 
-        // Freeze time
+        // Pause time
         Time.timeScale = 0f;
 
-        // Unlock cursor
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        // Disable movement & grappling scripts
+        if (movementScript != null) movementScript.enabled = false;
 
-        // Disable movement & camera
-        if (movementScript != null)
-            movementScript.enabled = false;
+        if (grapplingScript != null)
+        {
+            wasGrapplingBeforePause = grapplingScript.IsGrappling();
+            grapplingScript.enabled = false;
+        }
+
+        // Freeze physics
+        if (grapplingController != null)
+        {
+            Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
+            if (rb != null) rb.isKinematic = true;
+        }
+
+        // Unlock cursor
+        if (mouseLookScript != null)
+            mouseLookScript.SetPaused(true);
     }
 
     public void Resume()
     {
-        if (setting != null)
-            setting.SetActive(false);
-
-        issettingactive = false;
+        isSettingsActive = false;
 
         // Resume time
         Time.timeScale = 1f;
 
-        // Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (setting != null) setting.SetActive(false);
+        if (crosshair != null) crosshair.SetActive(true);
 
-        // Re-enable movement & camera
-        if (movementScript != null)
-            movementScript.enabled = true;
+        if (movementScript != null) movementScript.enabled = true;
+        if (grapplingScript != null) grapplingScript.enabled = true;
+
+        if (grapplingController != null)
+        {
+            Rigidbody rb = grapplingController.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+
+                // Restore pending velocity if any
+                if (grapplingController.pendingVelocity != Vector3.zero)
+                {
+                    rb.linearVelocity = grapplingController.pendingVelocity;
+                    grapplingController.pendingVelocity = Vector3.zero;
+                }
+            }
+        }
+
+        if (mouseLookScript != null)
+            mouseLookScript.SetPaused(false);
+
+        // Restore grappling visual
+        if (wasGrapplingBeforePause && grapplingScript != null && grapplingScript.IsGrappling())
+        {
+            LineRenderer lr = grapplingScript.GetComponent<LineRenderer>();
+            if (lr != null)
+            {
+                lr.enabled = true;
+                lr.positionCount = 2;
+                lr.SetPosition(0, grapplingScript.gunTip.position);
+                lr.SetPosition(1, grapplingScript.GetGrapplePoint());
+            }
+        }
+
+        wasGrapplingBeforePause = false;
     }
 }

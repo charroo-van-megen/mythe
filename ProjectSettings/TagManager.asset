@@ -6,6 +6,10 @@ TagManager:
   tags:
   - Ground
   - test
+  - Scale
+  - Death Zone
+  - New tag
+  - Orb
   layers:
   - Default
   - TransparentFX
