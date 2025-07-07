@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class StartButton : MonoBehaviour
+public class ToCredits : MonoBehaviour
 {
     public void LoadGameScene()
     {
-        SceneManager.LoadScene("LV1 1 (TEXTURES)");
+        SceneManager.LoadScene("End Credits");
     }
 }
